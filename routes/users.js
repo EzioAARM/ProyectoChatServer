@@ -59,6 +59,7 @@ router.post('/registrar', function(req, res, next) {
   var apellido = req.body.apellido;
   var fechaNacimiento = req.body.fechaNacimiento;
   var correo = req.body.correo;
+  var telefono = req.body.telefono;
 
   MongoClient.connect(url, function(error, cliente) {
     if (error) res.send({status: 502});
@@ -74,7 +75,8 @@ router.post('/registrar', function(req, res, next) {
           nombre: nombre,
           apellido: apellido,
           fechaNacimiento: fechaNacimiento,
-          correo: correo
+          correo: correo,
+          telefono: telefono
         }, function(error, result) {
           if (error) res.send({status: 502});
           res.send({status: 201});
