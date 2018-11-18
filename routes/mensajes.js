@@ -27,12 +27,33 @@ var emisor = req.params.emisor;
   });
 });
 
-router.get('/:emisor/:receptor', function(req, res) {
+router.get('/:emisor/:clave', function(req, res) {
+  var emisor = req.params.emisor;
+  var clave = req.params.clave;
+    MongoClient.connect(url, function(err, client) {
+      var collection = client.db(dbName).collection("usuarios");
+      collection.find({emisor:emisor,mensaje:{$regex : clave}}).toArray(function(err, documento){
+        if (err){
+          res.send(404);
+        }
+        else {
+          res.send({
+            data: documento,
+            status: 200
+          });
+        }
+      });
+      client.close();
+    });
+  });
+
+router.get('/:emisor/:receptor/:clave', function(req, res) {
   var emisor = req.params.emisor;
   var receptor = req.params.receptor;
+  var clave = req.params.clave;
   MongoClient.connect(url, function(err, client) {
     var collection = client.db(dbName).collection("usuarios");
-    collection.find({emisor:emisor, receptor:receptor}).toArray(function(err, documento){
+    collection.find({emisor:emisor, receptor:receptor,mensaje:{$regex : clave}}).toArray(function(err, documento){
       if (err){
         res.send(404);
       }
