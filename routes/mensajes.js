@@ -32,7 +32,7 @@ router.get('/:emisor/:receptor', function(req, res) {
   var receptor = req.params.receptor;
   MongoClient.connect(url, function(err, client) {
     var collection = client.db(dbName).collection("usuarios");
-    collection.findOne({emisor:emisor, receptor:receptor}, function(err, documento){
+    collection.find({emisor:emisor, receptor:receptor}).toArray(function(err, documento){
       if (err){
         res.send(404);
       }
