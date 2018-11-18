@@ -8,13 +8,14 @@ const url = 'mongodb+srv://roma:1A2basdf@chatdb-53u3w.mongodb.net/test?retryWrit
 const dbName = "ChatProject";
 
 /* GET home page. */
-router.get('/:emisor', function(req, res, next) {
+router.get('/:emisor', function(req, res) {
 var emisor = req.params.emisor;
   MongoClient.connect(url, function(err, client) {
     var collection = client.db(dbName).collection("usuarios");
     collection.findOne({emisor:emisor}, function(err, documento){
-      if (err)
+      if (err){
         res.send(404);
+      }
       else {
         res.send({
           data: documento,
@@ -26,14 +27,15 @@ var emisor = req.params.emisor;
   });
 });
 
-router.get('/:emisor/:receptor', function(req, res, next) {
+router.get('/:emisor/:receptor', function(req, res) {
   var emisor = req.params.emisor;
   var receptor = req.params.receptor;
   MongoClient.connect(url, function(err, client) {
     var collection = client.db(dbName).collection("usuarios");
     collection.findOne({emisor:emisor, receptor:receptor}, function(err, documento){
-      if (err)
+      if (err){
         res.send(404);
+      }
       else {
         res.send({
           data: documento,
@@ -45,28 +47,30 @@ router.get('/:emisor/:receptor', function(req, res, next) {
   });
 });
 
-router.post('/:emisor', function(req, res, next) {
+router.post('/', function(req, res) {
   var json = {
-    emisor : req.params.emisor,
+    emisor : req.body.emisor,
     receptor : req.body.receptor,
     mensaje : req.body.mensaje,
-    archivo : req.body.archivo
+    tieneArchivo : req.body.tieneArchivo,
+    ubicacionArchivo : req.body.ubicacionArchivo,
+    hayGrupo : req.body.hayGrupo,
+    leido : req.body.leido,
+    fechaEnviado : req.body.fechaEnviado,
+    horaEnviado : req.body.horaEnviado
   };
   MongoClient.connect(url, function(err, client) {
     var collection = client.db(dbName).collection("usuarios");
-    collection.findOne({username: req.body.receptor}, function(error, result) {
-      if (error) res.send({status: 502});
+    collection.findOne({username: req.body.receptor}, function(err, result) {
+      if (err){ 
+      res.send({status: 502});
+      }
       if (!result){
         res.send({
           status: 404
         });
       } else {
-        collection.insertOne({
-          "emisor" : req.params.emisor,
-          "receptor" : req.body.receptor,
-          "mensaje" : req.body.mensaje,
-          "archivo" : req.body.archivo
-        }, function(err, documento){
+        collection.insertOne(json, function(err, result){
           if (err){
             res.send(404);
             console.log(err);
@@ -79,7 +83,6 @@ router.post('/:emisor', function(req, res, next) {
         });
       }
     });
-    
     client.close();
   });
 });
