@@ -1,5 +1,6 @@
 var express = require('express');
 const MongoClient = require('mongodb').MongoClient;
+var ObjectID = require('mongodb').ObjectID;
 const assert = require('assert');
 var router = express.Router();
 
@@ -7,7 +8,7 @@ const url = 'mongodb+srv://roma:1A2basdf@chatdb-53u3w.mongodb.net/test?retryWrit
 const dbName = "ChatProject";
 
 /* GET users listing. */
-router.get('/login', function(req, res, next) {
+router.get('/login/:username/:password', function(req, res, next) {
   var user = req.params.username;
   var password = req.params.password;
   MongoClient.connect(url, function(error, cliente) {
@@ -18,7 +19,7 @@ router.get('/login', function(req, res, next) {
         password: password
       }, function(error, result) {
         if (error) res.send({status: 502});
-        if (!result.username){
+        if (!result){
           res.send({
             status: 404
           });
@@ -43,19 +44,86 @@ router.post('/registrar', function(req, res, next) {
   MongoClient.connect(url, function(error, cliente) {
     if (error) res.send({status: 502});
     var collection = cliente.db(dbName).collection("usuarios");
-    collection.insertOne({
-      username: username,
-      password: password,
-      nombre: nombre,
-      apellido: apellido,
-      fechaNacimiento: fechaNacimiento,
-      correo: correo
+    collection.findOne({
+      username: username
     }, function(error, result) {
       if (error) res.send({status: 502});
-      res.send({status: 201});
-    });
+      if (!result){
+        collection.insertOne({
+          username: username,
+          password: password,
+          nombre: nombre,
+          apellido: apellido,
+          fechaNacimiento: fechaNacimiento,
+          correo: correo
+        }, function(error, result) {
+          if (error) res.send({status: 502});
+          res.send({status: 201});
+        });
+      } else {
+        res.send({
+          status: 409
+        });
+      }
+    });    
   });
+});
 
+router.put('/modificar/:user', function(req, res){
+  var username = req.params.user;
+  var id;
+  
+  MongoClient.connect(url, function(error, cliente) {
+    if (error) res.send({status: 502});
+    var collection = cliente.db(dbName).collection("usuarios");
+    collection.findOne({username:username},function(error, result) {
+      if (error) res.send({status: 502});
+      id = result._id;
+
+      var json = {
+        "_id" : new ObjectID (id),
+        "username" : username,
+        "password" : req.body.password,
+        "nombre" : req.body.nombre,
+        "apellido" : req.body.apellido,
+        "fechaNacimiento" : req.body.fechaNacimiento,
+        "correo" : req.body.correo,
+        "status" : req.body.status,
+        "imagen" : req.body.imagen
+      }
+
+      collection.findOneAndReplace({
+        username: username
+      },json, function(error, result) {
+        if (error) res.send({status: 502});
+        else {
+          res.send({
+            status: 200,
+            data: result
+          });
+        }
+      });
+    });    
+  });
+});
+
+router.delete('/borrar/:user', function(req, res){
+  var username = req.params.user;
+
+  MongoClient.connect(url, function(error, cliente) {
+    if (error) res.send({status: 502});
+    var collection = cliente.db(dbName).collection("usuarios");
+    collection.findOneAndUpdate({
+      username: username
+    },{$set:{"status": false}} ,function(error, result) {
+      if (error) res.send({status: 502});
+      else {
+        res.send({
+          status: 200
+        });
+      }
+    });    
+  });
 });
 
 module.exports = router;
