@@ -12,7 +12,7 @@ router.get('/:emisor', function(req, res) {
 var emisor = req.params.emisor;
   MongoClient.connect(url, function(err, client) {
     var collection = client.db(dbName).collection("usuarios");
-    collection.findOne({emisor:emisor}, function(err, documento){
+    collection.find({emisor:emisor}).toArray(function(err, documento){
       if (err){
         res.send(404);
       }
@@ -81,9 +81,10 @@ router.post('/', function(req, res) {
             });
           }
         });
+        client.close();
       }
     });
-    client.close();
+    //aqui estaba antes
   });
 });
 module.exports = router;
