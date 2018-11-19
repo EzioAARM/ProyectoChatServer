@@ -33,24 +33,43 @@ router.get('/login/:username/:password', function(req, res, next) {
   });
 });
 
-router.get('/mensajes/:user', function(req, res) {
+router.get('buscarExacto/:user', function(req, res) {
   var user = req.params.user;
-    MongoClient.connect(url, function(err, client) {
-      var collection = client.db(dbName).collection("usuarios");
-      collection.find({emisor:user}).toArray(function(err, documento){
-        if (err){
-          res.send(404);
-        }
-        else {
-          res.send({
-            data: documento,
-            status: 200
-          });
-        }
-      });
-      client.close();
+  MongoClient.connect(url, function(err, client) {
+    var collection = client.db(dbName).collection("usuarios");
+    collection.find({emisor: user}).toArray(function(err, documento){
+      if (err){
+        res.send(404);
+      }
+      else {
+        res.send({
+          data: documento,
+          status: 200
+        });
+      }
     });
+    client.close();
   });
+});
+
+router.get('buscarContiene/:user', function(req, res) {
+  var user = req.params.user;
+  MongoClient.connect(url, function(err, client) {
+    var collection = client.db(dbName).collection("usuarios");
+    collection.find({emisor: "/" + user + "/"}).toArray(function(err, documento){
+      if (err){
+        res.send(404);
+      }
+      else {
+        res.send({
+          data: documento,
+          status: 200
+        });
+      }
+    });
+    client.close();
+  });
+});
 
 router.post('/registrar', function(req, res, next) {
   var username = req.body.user;
