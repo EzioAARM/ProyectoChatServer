@@ -43,7 +43,7 @@ router.get('buscarExacto/:user', function(req, res) {
       }
       else {
         res.send({
-          data: documento,
+          message: "El usuario ya existe",
           status: 200
         });
       }
@@ -81,12 +81,12 @@ router.post('/registrar', function(req, res, next) {
   var telefono = req.body.telefono;
 
   MongoClient.connect(url, function(error, cliente) {
-    if (error) res.send({status: 502});
+    if (error) res.send({status: 502, message: "Error al conectar con el servidor"});
     var collection = cliente.db(dbName).collection("usuarios");
     collection.findOne({
       username: username
     }, function(error, result) {
-      if (error) res.send({status: 502});
+      if (error) res.send({status: 502, message: "Error al validar el usuario"});
       if (!result){
         collection.insertOne({
           username: username,
@@ -97,11 +97,12 @@ router.post('/registrar', function(req, res, next) {
           correo: correo,
           telefono: telefono
         }, function(error, result) {
-          if (error) res.send({status: 502});
-          res.send({status: 201});
+          if (error) res.send({status: 502, message: "Error al insertar el usuario en la base de datos"});
+          res.send({status: 201, message: "El usuario se insertó correctamente"});
         });
       } else {
         res.send({
+          message: "El usuario ya existe",
           status: 409
         });
       }
