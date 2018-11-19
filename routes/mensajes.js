@@ -139,26 +139,64 @@ io.on('connection', (socket) => {
   
   socket.on('join', function(username) {
     console.log(username +" : has joined the chat "  );
-    });
+  });
   
   
-  socket.on('messagedetection', (emisor,mensaje) => {
+  socket.on('messagedetection', (emisor,receptor,mensaje, tieneArchivo, ubicacionArchivo, hayGrupo, leido, fechaEnviado, horaEnviado) => {
     console.log(emisor+" : " +mensaje);
-    var json = {
+    var message = {
       "emisor":emisor,
       "mensaje":mensaje
     };
-    socket.emit('message', json);
+    socket.emit('message', message);
+    var json = {
+      emisor : emisor,
+      receptor : receptor,
+      mensaje : mensaje,
+      tieneArchivo : tieneArchivo,
+      ubicacionArchivo : ubicacionArchivo,
+      hayGrupo : hayGrupo,
+      leido : leido,
+      fechaEnviado : fechaEnviado,
+      horaEnviado : horaEnviado
+    };
+    MongoClient.connect(url, function(err, client) {
+      var collection = client.db(dbName).collection("usuarios");
+      collection.findOne({username: emisor}, function(err, result) {
+        if (err){ 
+        res.send({status: 502});
+        }
+        if (!result){
+          res.send({
+            status: 404
+          });
+        } else {
+          collection.insertOne(json, function(err, result){
+            if (err){
+              res.send(404);
+              console.log(err);
+            }
+            else {
+              res.send({
+                status: 200
+              });
+            }
+          });
+          client.close();
+        }
+      });
+      //aqui estaba antes
     });
+  });
   
     socket.on('disconnect', function(username) {
       console.log(username +' has left ')
     });
   });
 
-server.listen(4000, function(){
+server.listen(3001, function(){
 
-  console.log('Node app is running on port 4000')
+  console.log('Socket running on port 3001')
   
   });
 
