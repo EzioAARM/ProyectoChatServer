@@ -3,6 +3,9 @@ var router = express.Router();
 const MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 const assert = require('assert');
+server = http.createServer(app),
+http = require('http'),
+io = require('socket.io').listen(server);
 
 const url = 'mongodb+srv://roma:1A2basdf@chatdb-53u3w.mongodb.net/test?retryWrites=true';
 const dbName = "ChatProject";
@@ -13,6 +16,27 @@ var emisor = req.params.emisor;
   MongoClient.connect(url, function(err, client) {
     var collection = client.db(dbName).collection("usuarios");
     collection.find({emisor:emisor}).toArray(function(err, documento){
+      if (err){
+        res.send(404);
+      }
+      else {
+        res.send({
+          data: documento,
+          status: 200
+        });
+      }
+    });
+    client.close();
+  });
+});
+
+router.get('/:emisor/:receptor', function(req, res) {
+  var emisor = req.params.emisor;
+  var receptor = req.params.receptor;
+  var clave = req.params.clave;
+  MongoClient.connect(url, function(err, client) {
+    var collection = client.db(dbName).collection("usuarios");
+    collection.find({emisor:emisor, receptor:receptor}).toArray(function(err, documento){
       if (err){
         res.send(404);
       }
@@ -108,4 +132,34 @@ router.post('/', function(req, res) {
     //aqui estaba antes
   });
 });
+
+io.on('connection', (socket) => {
+
+  console.log('user connected');
+  
+  socket.on('join', function(username) {
+    console.log(username +" : has joined the chat "  );
+    });
+  
+  
+  socket.on('messagedetection', (emisor,mensaje) => {
+    console.log(emisor+" : " +mensaje);
+    var json = {
+      "emisor":emisor,
+      "mensaje":mensaje
+    };
+    socket.emit('message', json);
+    });
+  
+    socket.on('disconnect', function(username) {
+      console.log(username +' has left ')
+    });
+  });
+
+server.listen(3000, function(){
+
+  console.log('Node app is running on port 3000')
+  
+  });
+
 module.exports = router;
