@@ -8,8 +8,8 @@ const url = 'mongodb+srv://roma:1A2basdf@chatdb-53u3w.mongodb.net/test?retryWrit
 const dbName = "ChatProject";
 
 /* GET users listing. */
-router.get('/login/:username/:password', function(req, res, next) {
-  var user = req.params.username;
+router.get('/login/:user/:password', function(req, res, next) {
+  var user = req.params.user;
   var password = req.params.password;
   MongoClient.connect(url, function(error, cliente) {
     if (error) res.send({status: 502});
@@ -102,7 +102,7 @@ router.post('/registrar', function(req, res, next) {
         });
       } else {
         res.send({
-          message: "El usuario ya existe",
+          message: "El usuario " + username + " ya existe",
           status: 409
         });
       }
