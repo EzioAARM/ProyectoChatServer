@@ -3,8 +3,8 @@ var router = express.Router();
 const MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 const assert = require('assert');
-server = http.createServer(app),
-http = require('http'),
+http = require('http');
+server = http.createServer(express),
 io = require('socket.io').listen(server);
 
 const url = 'mongodb+srv://roma:1A2basdf@chatdb-53u3w.mongodb.net/test?retryWrites=true';
@@ -156,9 +156,9 @@ io.on('connection', (socket) => {
     });
   });
 
-server.listen(3000, function(){
+server.listen(4000, function(){
 
-  console.log('Node app is running on port 3000')
+  console.log('Node app is running on port 4000')
   
   });
 
