@@ -12,20 +12,22 @@ router.get('/login/:user/:password', function(req, res, next) {
   var user = req.params.user;
   var password = req.params.password;
   MongoClient.connect(url, function(error, cliente) {
-    if (error) res.send({status: 502});
+    if (error) res.send({status: 502, message: "Hubo un error conectandose a la base de datos"});
     var collection = cliente.db(dbName).collection("usuarios");
       collection.findOne({
         username: user,
         password: password
       }, function(error, result) {
-        if (error) res.send({status: 502});
+        if (error) res.send({status: 502, message: "Hubo un error verificando su usuario"});
         if (!result){
           res.send({
-            status: 404
+            status: 404,
+            message: "Los datos que ingreso son incorrectos"
           });
         } else {
           res.send({
             status: 200,
+            message: "El usuario que ingresó si existe",
             data: result
           });
         }
@@ -36,10 +38,14 @@ router.get('/login/:user/:password', function(req, res, next) {
 router.get('buscarExacto/:user', function(req, res) {
   var user = req.params.user;
   MongoClient.connect(url, function(err, client) {
+    if (err) res.send({status: 502, message: "Hubo un error conectandose a la base de datos"});
     var collection = client.db(dbName).collection("usuarios");
     collection.find({emisor: user}).toArray(function(err, documento){
       if (err){
-        res.send(404);
+        res.send({
+          status: 404,
+          message: "El usuario no existe"
+        });
       }
       else {
         res.send({
@@ -55,15 +61,20 @@ router.get('buscarExacto/:user', function(req, res) {
 router.get('buscarContiene/:user', function(req, res) {
   var user = req.params.user;
   MongoClient.connect(url, function(err, client) {
+    if (err) res.send({status: 502, message: "Hubo un error conectandose a la base de datos"});
     var collection = client.db(dbName).collection("usuarios");
     collection.find({emisor: "/" + user + "/"}).toArray(function(err, documento){
       if (err){
-        res.send(404);
+        res.send({
+          status: 404,
+          message: "No se encontraron coincidencias"
+        });
       }
       else {
         res.send({
           data: documento,
-          status: 200
+          status: 200,
+          message: "Hay coincidencias"
         });
       }
     });
@@ -115,10 +126,10 @@ router.put('/modificar/:user', function(req, res){
   var id;
   
   MongoClient.connect(url, function(error, cliente) {
-    if (error) res.send({status: 502});
+    if (error) res.send({status: 502, message: "Error al conectar con el servidor"});
     var collection = cliente.db(dbName).collection("usuarios");
     collection.findOne({username:username},function(error, result) {
-      if (error) res.send({status: 502});
+      if (error) res.send({status: 502, message: "Error al buscar el usuario"});
       id = result._id;
 
       var json = {
@@ -136,11 +147,12 @@ router.put('/modificar/:user', function(req, res){
       collection.findOneAndReplace({
         username: username
       },json, function(error, result) {
-        if (error) res.send({status: 502});
+        if (error) res.send({status: 502, message: "Error al actualizar el usuario"});
         else {
           res.send({
             status: 200,
-            data: result
+            data: result,
+            message: "El usuario se actualizó con éxito"
           });
         }
       });
@@ -152,15 +164,16 @@ router.delete('/borrar/:user', function(req, res){
   var username = req.params.user;
 
   MongoClient.connect(url, function(error, cliente) {
-    if (error) res.send({status: 502});
+    if (error) res.send({status: 502,  message: "Error al conectar con el servidor"});
     var collection = cliente.db(dbName).collection("usuarios");
     collection.findOneAndUpdate({
       username: username
     },{$set:{"status": false}} ,function(error, result) {
-      if (error) res.send({status: 502});
+      if (error) res.send({status: 502, message: "Error al borrar el usuario"});
       else {
         res.send({
-          status: 200
+          status: 200,
+          message: "El usuario se borró correctamente"
         });
       }
     });    
