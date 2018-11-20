@@ -85,13 +85,9 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
         var collection = cliente.db(dbName).collection("conversaciones");
         collection.find({
             $or: [ {
-                    user1: {
-                        $in: [user1, user2]
-                    }
+                    user1: username
                 }, {
-                    user2: {
-                        $in: [user1, user2]
-                    }
+                    user2: username
                 }
             ]
         }, function (error, result) {
