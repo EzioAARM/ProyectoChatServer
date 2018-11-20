@@ -15,11 +15,13 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
     var esGrupo = req.body.esGrupo;
     var username = user1;
     MongoClient.connect(url, function(error, cliente) {
-        if (error) res.send({
-            status: 502, 
-            message: "Error al conectar con el servidor",
-            token: utilidadToken.crearToken(username)
-        });
+        if (error) {
+                res.send({
+                status: 502, 
+                message: "Error al conectar con el servidor",
+                token: utilidadToken.crearToken(username)
+            });
+        }
         var collection = cliente.db(dbName).collection("conversaciones");
         collection.findOne({
             $or: [ {
@@ -33,22 +35,26 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
                 }
             ]
         }, function(error, result) {
-            if (error) res.send({
-                status: 502, 
-                message: "Error al verificar la existencia de la conversación",
-                token: utilidadToken.crearToken(username)
-            });
+            if (error) {
+                res.send({
+                    status: 502, 
+                    message: "Error al verificar la existencia de la conversación",
+                    token: utilidadToken.crearToken(username)
+                });
+            }
             if (!result) {
                 collection.insertOne({
                     user1: user1,
                     user2: user2,
                     esGrupo: esGrupo
                 }, function(error, result) {
-                    if (error) res.send({
-                        status: 502, 
-                        message: "Error al crear la conversación",
-                        token: utilidadToken.crearToken(username)
-                    });
+                    if (error) {
+                            res.send({
+                            status: 502, 
+                            message: "Error al crear la conversación",
+                            token: utilidadToken.crearToken(username)
+                        });
+                    }
                     res.send({
                         status: 201,
                         message: "La conversación se creo con éxito",
@@ -70,11 +76,13 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
 router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
     var username = req.params.username;
     MongoClient.connect(url, function(error, cliente) {
-        if (error) res.send({
-            status: 502, 
-            message: "Error al conectar con el servidor",
-            token: utilidadToken.crearToken(username)
-        });
+        if (error) {
+                res.send({
+                status: 502, 
+                message: "Error al conectar con el servidor",
+                token: utilidadToken.crearToken(username)
+            });
+        }
         var collection = cliente.db(dbName).collection("conversaciones");
         collection.find({
             $or: [ {
@@ -88,11 +96,13 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                 }
             ]
         }, function (error, result) {
-            if (error) res.send({
-                status: 502, 
-                message: "Error al obtener las conversaciones",
-                token: utilidadToken.crearToken(username)
-            });
+            if (error) {
+                    res.send({
+                    status: 502, 
+                    message: "Error al obtener las conversaciones",
+                    token: utilidadToken.crearToken(username)
+                });
+            }
             if (result) {
                 res.send({
                     status: 302,
