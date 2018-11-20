@@ -151,20 +151,22 @@ router.put('/modificar/:user', middlewareJWT.Auth, function(req, res){
         message: "Error al buscar el usuario",
         token: utilidadToken.crearToken(username)
       });
-      id = result._id;
-
-      var json = {
-        "_id" : new ObjectID (id),
-        "username" : username,
-        "password" : req.body.password,
-        "nombre" : req.body.nombre,
-        "apellido" : req.body.apellido,
-        "fechaNacimiento" : req.body.fechaNacimiento,
-        "correo" : req.body.correo,
-        "status" : req.body.status,
-        "imagen" : req.body.imagen
+      else
+      {
+        id = result._id;
+        password = result.password;
+        var json = {
+          "_id" : new ObjectID (id),
+          "username" : username,
+          "password" : password,
+          "nombre" : req.body.nombre,
+          "apellido" : req.body.apellido,
+          "fechaNacimiento" : req.body.fechaNacimiento,
+          "correo" : req.body.correo,
+          "status" : req.body.status,
+          "imagen" : req.body.imagen
+        }
       }
-
       collection.findOneAndReplace({
         username: username
       },json, function(error, result) {
@@ -207,6 +209,36 @@ router.delete('/borrar/:user', middlewareJWT.Auth, function(req, res){
         res.send({
           status: 200,
           message: "El usuario se borró correctamente",
+          token: utilidadToken.crearToken(username)
+        });
+      }
+    });    
+  });
+});
+
+router.put('/:user', middlewareJWT.Auth, function(req, res){
+  var username = req.params.user;
+  var contraseña = req.body.contraseña;
+
+  MongoClient.connect(url, function(error, cliente) {
+    if (error) res.send({
+      status: 502,  
+      message: "Error al conectar con el servidor",
+      token: utilidadToken.crearToken(username)
+    });
+    var collection = cliente.db(dbName).collection("usuarios");
+    collection.findOneAndUpdate({
+      username: username
+    },{$set:{"password": contraseña}} ,function(error, result) {
+      if (error) res.send({
+        status: 502, 
+        message: "Error al actualizar contraseña",
+        token: utilidadToken.crearToken(username)
+      });
+      else {
+        res.send({
+          status: 200,
+          message: "La contraseña fue actualizada correctamente",
           token: utilidadToken.crearToken(username)
         });
       }
