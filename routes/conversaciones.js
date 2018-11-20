@@ -69,7 +69,6 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
                 });
             }
         });
-        cliente.close();
     });
 });
 
