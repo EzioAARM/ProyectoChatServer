@@ -13,6 +13,7 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
     var user1 = req.body.user1;
     var user2 = req.body.user2;
     var esGrupo = req.body.esGrupo;
+    var username = user1;
     MongoClient.connect(url, function(error, cliente) {
         if (error) res.send({
             status: 502, 
