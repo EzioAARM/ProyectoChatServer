@@ -14,13 +14,19 @@ router.get('/login/:user/:password', function(req, res, next) {
   var user = req.params.user;
   var password = req.params.password;
   MongoClient.connect(url, function(error, cliente) {
-    if (error) res.send({status: 502, message: "Hubo un error conectandose a la base de datos"});
+    if (error) res.send({
+      status: 502, 
+      message: "Hubo un error conectandose a la base de datos"
+    });
     var collection = cliente.db(dbName).collection("usuarios");
       collection.findOne({
         username: user,
         password: password
       }, function(error, result) {
-        if (error) res.send({status: 502, message: "Hubo un error verificando su usuario"});
+        if (error) res.send({
+          status: 502, 
+          message: "Hubo un error verificando su usuario"
+        });
         if (!result){
           res.send({
             status: 404,
