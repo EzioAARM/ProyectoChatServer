@@ -99,6 +99,8 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                 });
             }
             if (result) {
+                console.log(result);
+                
                 res.send({
                     status: 302,
                     message: "Se encontraron las conversaciones",
