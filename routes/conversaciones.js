@@ -99,20 +99,19 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                 });
             }
             if (result) {
-                console.log(result);
-                
                 res.send({
                     status: 302,
                     message: "Se encontraron las conversaciones",
                     data: result,
                     token: utilidadToken.crearToken(username)
                 });
+            } else {
+                res.send({
+                    status: 404,
+                    message: "No tiene conversaciones",
+                    token: utilidadToken.crearToken(username)
+                });
             }
-            res.send({
-                status: 404,
-                message: "No tiene conversaciones",
-                token: utilidadToken.crearToken(username)
-            });
         });
     });
 });
