@@ -90,7 +90,7 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                     user2: username
                 }
             ]
-        }, function (error, result) {
+        }).toArray(function (error, result) {
             if (error) {
                     res.send({
                     status: 502, 
@@ -108,6 +108,11 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                     token: utilidadToken.crearToken(username)
                 });
             }
+            res.send({
+                status: 404,
+                message: "No tiene conversaciones",
+                token: utilidadToken.crearToken(username)
+            });
         });
     });
 });
