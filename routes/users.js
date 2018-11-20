@@ -3,6 +3,8 @@ const MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 const assert = require('assert');
 var router = express.Router();
+var middlewareJWT = require('./middleware');
+var utilidadToken = require('./services');
 
 const url = 'mongodb+srv://roma:1A2basdf@chatdb-53u3w.mongodb.net/test?retryWrites=true';
 const dbName = "ChatProject";
@@ -28,29 +30,35 @@ router.get('/login/:user/:password', function(req, res, next) {
           res.send({
             status: 200,
             message: "El usuario que ingresó si existe",
-            data: result
+            token: utilidadToken.crearToken(user)
           });
         }
       });
   });
 });
 
-router.get('buscarExacto/:user', function(req, res) {
+router.get('buscarExacto/:user', middlewareJWT.Auth, function(req, res) {
   var user = req.params.user;
   MongoClient.connect(url, function(err, client) {
-    if (err) res.send({status: 502, message: "Hubo un error conectandose a la base de datos"});
+    if (err) res.send({
+      status: 502, 
+      message: "Hubo un error conectandose a la base de datos",
+      token: utilidadToken.crearToken(user)
+    });
     var collection = client.db(dbName).collection("usuarios");
     collection.find({emisor: user}).toArray(function(err, documento){
       if (err){
         res.send({
           status: 404,
-          message: "El usuario no existe"
+          message: "El usuario no existe",
+          token: utilidadToken.crearToken(user)
         });
       }
       else {
         res.send({
           message: "El usuario ya existe",
-          status: 200
+          status: 200,
+          token: utilidadToken.crearToken(user)
         });
       }
     });
@@ -58,23 +66,28 @@ router.get('buscarExacto/:user', function(req, res) {
   });
 });
 
-router.get('buscarContiene/:user', function(req, res) {
+router.get('buscarContiene/:user', middlewareJWT.Auth, function(req, res) {
   var user = req.params.user;
   MongoClient.connect(url, function(err, client) {
-    if (err) res.send({status: 502, message: "Hubo un error conectandose a la base de datos"});
+    if (err) res.send({
+      status: 502, 
+      message: "Hubo un error conectandose a la base de datos",
+      token: utilidadToken.crearToken(user)});
     var collection = client.db(dbName).collection("usuarios");
     collection.find({emisor: "/" + user + "/"}).toArray(function(err, documento){
       if (err){
         res.send({
           status: 404,
-          message: "No se encontraron coincidencias"
+          message: "No se encontraron coincidencias",
+          token: utilidadToken.crearToken(user)
         });
       }
       else {
         res.send({
           data: documento,
           status: 200,
-          message: "Hay coincidencias"
+          message: "Hay coincidencias",
+          token: utilidadToken.crearToken(user)
         });
       }
     });
@@ -121,15 +134,23 @@ router.post('/registrar', function(req, res, next) {
   });
 });
 
-router.put('/modificar/:user', function(req, res){
+router.put('/modificar/:user', middlewareJWT.Auth, function(req, res){
   var username = req.params.user;
   var id;
   
   MongoClient.connect(url, function(error, cliente) {
-    if (error) res.send({status: 502, message: "Error al conectar con el servidor"});
+    if (error) res.send({
+      status: 502, 
+      message: "Error al conectar con el servidor",
+      token: utilidadToken.crearToken(user)
+    });
     var collection = cliente.db(dbName).collection("usuarios");
     collection.findOne({username:username},function(error, result) {
-      if (error) res.send({status: 502, message: "Error al buscar el usuario"});
+      if (error) res.send({
+        status: 502, 
+        message: "Error al buscar el usuario",
+        token: utilidadToken.crearToken(user)
+      });
       id = result._id;
 
       var json = {
@@ -147,12 +168,16 @@ router.put('/modificar/:user', function(req, res){
       collection.findOneAndReplace({
         username: username
       },json, function(error, result) {
-        if (error) res.send({status: 502, message: "Error al actualizar el usuario"});
+        if (error) res.send({
+          status: 502, 
+          message: "Error al actualizar el usuario",
+          token: utilidadToken.crearToken(user)});
         else {
           res.send({
             status: 200,
             data: result,
-            message: "El usuario se actualizó con éxito"
+            message: "El usuario se actualizó con éxito",
+            token: utilidadToken.crearToken(user)
           });
         }
       });
@@ -160,20 +185,29 @@ router.put('/modificar/:user', function(req, res){
   });
 });
 
-router.delete('/borrar/:user', function(req, res){
+router.delete('/borrar/:user', middlewareJWT.Auth, function(req, res){
   var username = req.params.user;
 
   MongoClient.connect(url, function(error, cliente) {
-    if (error) res.send({status: 502,  message: "Error al conectar con el servidor"});
+    if (error) res.send({
+      status: 502,  
+      message: "Error al conectar con el servidor",
+      token: utilidadToken.crearToken(user)
+    });
     var collection = cliente.db(dbName).collection("usuarios");
     collection.findOneAndUpdate({
       username: username
     },{$set:{"status": false}} ,function(error, result) {
-      if (error) res.send({status: 502, message: "Error al borrar el usuario"});
+      if (error) res.send({
+        status: 502, 
+        message: "Error al borrar el usuario",
+        token: utilidadToken.crearToken(user)
+      });
       else {
         res.send({
           status: 200,
-          message: "El usuario se borró correctamente"
+          message: "El usuario se borró correctamente",
+          token: utilidadToken.crearToken(user)
         });
       }
     });    
