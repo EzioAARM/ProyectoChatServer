@@ -142,14 +142,14 @@ router.put('/modificar/:user', middlewareJWT.Auth, function(req, res){
     if (error) res.send({
       status: 502, 
       message: "Error al conectar con el servidor",
-      token: utilidadToken.crearToken(user)
+      token: utilidadToken.crearToken(username)
     });
     var collection = cliente.db(dbName).collection("usuarios");
     collection.findOne({username:username},function(error, result) {
       if (error) res.send({
         status: 502, 
         message: "Error al buscar el usuario",
-        token: utilidadToken.crearToken(user)
+        token: utilidadToken.crearToken(username)
       });
       id = result._id;
 
@@ -171,13 +171,13 @@ router.put('/modificar/:user', middlewareJWT.Auth, function(req, res){
         if (error) res.send({
           status: 502, 
           message: "Error al actualizar el usuario",
-          token: utilidadToken.crearToken(user)});
+          token: utilidadToken.crearToken(username)});
         else {
           res.send({
             status: 200,
             data: result,
             message: "El usuario se actualizó con éxito",
-            token: utilidadToken.crearToken(user)
+            token: utilidadToken.crearToken(username)
           });
         }
       });
@@ -192,7 +192,7 @@ router.delete('/borrar/:user', middlewareJWT.Auth, function(req, res){
     if (error) res.send({
       status: 502,  
       message: "Error al conectar con el servidor",
-      token: utilidadToken.crearToken(user)
+      token: utilidadToken.crearToken(username)
     });
     var collection = cliente.db(dbName).collection("usuarios");
     collection.findOneAndUpdate({
@@ -201,13 +201,13 @@ router.delete('/borrar/:user', middlewareJWT.Auth, function(req, res){
       if (error) res.send({
         status: 502, 
         message: "Error al borrar el usuario",
-        token: utilidadToken.crearToken(user)
+        token: utilidadToken.crearToken(username)
       });
       else {
         res.send({
           status: 200,
           message: "El usuario se borró correctamente",
-          token: utilidadToken.crearToken(user)
+          token: utilidadToken.crearToken(username)
         });
       }
     });    

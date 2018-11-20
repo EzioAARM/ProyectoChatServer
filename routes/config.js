@@ -1,3 +1,3 @@
 module.exports = {
-    TOKEN_SECRET = "trestristestigrestragabantrigoenuntrigal"
+    TOKEN_SECRET : "trestristestigrestragabantrigoenuntrigal"
 };
