@@ -37,7 +37,7 @@ router.get('/login/:user/:password', function(req, res, next) {
   });
 });
 
-router.get('buscarExacto/:user', middlewareJWT.Auth, function(req, res) {
+router.get('/buscarExacto/:user', middlewareJWT.Auth, function(req, res) {
   var user = req.params.user;
   MongoClient.connect(url, function(err, client) {
     if (err) res.send({
@@ -66,7 +66,7 @@ router.get('buscarExacto/:user', middlewareJWT.Auth, function(req, res) {
   });
 });
 
-router.get('buscarContiene/:user', middlewareJWT.Auth, function(req, res) {
+router.get('/buscarContiene/:user', middlewareJWT.Auth, function(req, res) {
   var user = req.params.user;
   MongoClient.connect(url, function(err, client) {
     if (err) res.send({
