@@ -6,6 +6,7 @@ const assert = require('assert');
 http = require('http');
 server = http.createServer(express),
 io = require('socket.io').listen(server);
+var formidable = require('formidable');
 
 const url = 'mongodb+srv://roma:1A2basdf@chatdb-53u3w.mongodb.net/test?retryWrites=true';
 const dbName = "ChatProject";
@@ -193,6 +194,39 @@ io.on('connection', (socket) => {
       console.log(username +' has left ')
     });
   });
+
+router.post('/upload', function(req, res){
+  var ruta = "";
+  var form = new formidable.IncomingForm();
+  form.type = true;
+  form.parse(req);
+  form.on('fileBegin', function(name, file){
+    file.path = __dirname + '/uploads/' + file.name;
+    ruta = file.path;
+  });
+  form.on('end', function(name){
+    var json = {
+      'nombre': name,
+      'ruta'  : ruta
+    };
+    MongoClient.connect(url, function(err, client) {
+      var collection = client.db(dbName).collection("usuarios");
+      collection.insertOne(json, function(err, result){
+        if (err){
+          res.send(502);
+          console.log(err);
+        }
+        else {
+          res.send({
+            status: 200,
+            body: json
+          });
+        }
+      });
+      client.close();
+    });
+  });
+});
 
 server.listen(3001, function(){
 
