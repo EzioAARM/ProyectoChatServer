@@ -221,12 +221,35 @@ router.post('/upload', function(req, res){
         else {
           res.send({
             status: 200,
-            body: json
+            data: json
           });
         }
       });
       client.close();
     });
+  });
+});
+
+router.get('/upload/:nombre', function(req, res){
+  var ruta = "";
+  var name = req.params.nombre;
+  
+  MongoClient.connect(url, function(err, client) {
+    var collection = client.db(dbName).collection("usuarios");
+    collection.FindOne({nombre:name}, function(err, result){
+      if (err){
+        res.send(502);
+        console.log(err);
+      }
+      else {
+        res.send({
+          status: 200,
+          data: result
+        });
+        ruta = result.ruta;
+      }
+    });
+    client.close();
   });
 });
 
