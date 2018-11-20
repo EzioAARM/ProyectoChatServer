@@ -197,16 +197,18 @@ io.on('connection', (socket) => {
 
 router.post('/upload', function(req, res){
   var ruta = "";
+  var nombre = "";
   var form = new formidable.IncomingForm();
   form.type = true;
   form.parse(req);
   form.on('fileBegin', function(name, file){
-    file.path = __dirname + '/uploads/' + file.name;
+    file.path = __dirname + '\\uploads\\' + file.name;
     ruta = file.path;
+    nombre = file.name;
   });
-  form.on('end', function(name){
+  form.on('end', function(){
     var json = {
-      'nombre': name,
+      'nombre': nombre,
       'ruta'  : ruta
     };
     MongoClient.connect(url, function(err, client) {
