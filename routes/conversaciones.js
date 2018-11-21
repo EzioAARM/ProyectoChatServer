@@ -107,7 +107,8 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                 });
                 var userDif = "";
                 var ResultadoConversaciones = result;
-                for (var i = 0; i < result.length; i++) {
+                var i = 0;
+                for (i = 0; i < result.length; i++) {
                     const JsonActual = result[i];
                     if (JsonActual.user1 === username){
                         userDif = JsonActual.user2;
