@@ -43,7 +43,7 @@ router.get('/login/:user/:password', function(req, res, next) {
   });
 });
 
-router.get('/buscarExacto/:user', middlewareJWT.Auth, function(req, res) {
+router.get('/buscarExacto/:user', function(req, res) {
   var user = req.params.user;
   MongoClient.connect(url, function(err, client) {
     if (err) res.send({
@@ -70,6 +70,51 @@ router.get('/buscarExacto/:user', middlewareJWT.Auth, function(req, res) {
     });
     client.close();
   });
+});
+
+router.get('/buscarImagenPerfil/:user', middlewareJWT.Auth, function(req, res) {
+  var user = req.params.user;
+  try {
+    MongoClient.connect(url, function(err, client) {
+      if (err) res.send({
+        status: 502, 
+        message: "Hubo un error conectandose a la base de datos",
+        token: utilidadToken.crearToken(user)
+      });
+      var dataBase = client.db(dbName);
+      var buscarFotoPerfilPromise = () => {
+        return new Promise((resolve, reject) => {
+          dataBase.
+            collection("usuarios")
+            .findOne({
+              username: user
+            }, {
+              imagen: 1
+            }, function(error, result) {
+              error
+                ? reject(error)
+                : resolve(result)
+            });
+        });
+      };
+      var callBuscarFotoPerfilPromise = async() => {
+        var fotoPerfil = await (buscarFotoPerfilPromise())
+        return fotoPerfil;
+      };
+      callBuscarFotoPerfilPromise().then(function(resultado) {
+        res.send({
+          status: 302,
+          data: resultado.imagen
+        });
+      });
+    });
+  } catch (error) {
+    res.send({
+      status: 502,
+      message: "Hubo un error",
+      error: error
+    });
+  }
 });
 
 router.get('/buscarContiene/:user', middlewareJWT.Auth, function(req, res) {
