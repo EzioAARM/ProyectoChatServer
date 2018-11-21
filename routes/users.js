@@ -114,7 +114,8 @@ router.get('/mostrar/:user', function(req, res) {
           fechaNacimiento: resultado.fechaNacimiento,
           correo: resultado.correo,
           telefono: resultado.telefono,
-          imagen: resultado.imagen
+          imagen: resultado.imagen,
+          token: utilidadToken.crearToken(user)
         });
       });
     });
@@ -122,7 +123,8 @@ router.get('/mostrar/:user', function(req, res) {
     res.send({
       status: 502,
       message: "Hubo un error",
-      error: error
+      error: error,
+      token: utilidadToken.crearToken(user)
     });
   }
 });
