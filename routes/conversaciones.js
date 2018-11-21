@@ -72,128 +72,103 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
     });
 });
 
-router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
+router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next){
     var username = req.params.username;
-    MongoClient.connect(url, function(error, cliente) {
-        if (error) {
+    try{
+        MongoClient.connect(url, function(error, cliente) {
+            if (error) {
                 res.send({
                 status: 502, 
                 message: "Error al conectar con el servidor",
                 token: utilidadToken.crearToken(username)
-            });
-        }
-        var collection = cliente.db(dbName).collection("conversaciones");
-        var collectionMensajes = cliente.db(dbName).collection("mensajes");
-        var collectionUsers = cliente.db(dbName).collection("usuarios");
-        collection.find({
-            $or: [ {
-                    user1: username
-                }, {
-                    user2: username
-                }
-            ]
-        }).toArray(function (error, result) {
-            if (error) {
-                    res.send({
-                    status: 502, 
-                    message: "Error al obtener las conversaciones",
-                    token: utilidadToken.crearToken(username)
                 });
             }
-            if (result) {
-                var arrayConversaciones = new Array();
-                result.forEach(function(dato) {
-                    arrayConversaciones.push({});
-                });
-                var userDif = "";
-                var ResultadoConversaciones = result;
-                var i = 0;
-                for (i = 0; i < result.length; i++) {
-                    const JsonActual = result[i];
-                    if (JsonActual.user1 === username){
-                        userDif = JsonActual.user2;
-                    } else {
-                        userDif = JsonActual.user1;
-                    }
-                    arrayConversaciones[i].ConversationId = JsonActual._id;
-                    arrayConversaciones[i].Emisor = userDif;
-                    var idBusqueda = JsonActual._id;
-                    // Obtener cantidad de mensajes no leidos
-                    collectionMensajes.find({
-                        leido: false,
-                        emisor: userDif,
-                        idConversacion: new ObjectID(idBusqueda)
-                    }).toArray(function(error, result) {
-                        if (error) {
-                            res.send({
-                            status: 502, 
-                            message: "Error al obtener la cantidad de mensajes nuevos",
-                            token: utilidadToken.crearToken(username)
-                            });
-                        }
-                        var cont = 0;
-                        result.forEach(function(elemento){
-                            cont++;
-                        });
-                        console.log(cont);
-                        console.log(result);
-                        
-                        console.log(arrayConversaciones);
-                        arrayConversaciones[i].Nuevos = cont;
-                        collectionMensajes.find({
-                            idConversation: arrayConversaciones[i].ConversationId
-                        },
-                        {
-                            $orderby: {
-                                FechaServidor: -1
+            var dataBase = cliente.db(dbName);
+            var buscarConversacionesPromise = () => {
+                return new Promise((resolve, reject) => {
+                    dataBase.
+                        collection('conversaciones')
+                        .find({
+                        $or: [ {
+                                user1: username
+                            }, {
+                                user2: username
                             }
-                        }).toArray(function(error, result) {
-                            if (error) {
-                                res.send({
-                                    status: 502, 
-                                    message: "Error al obtener el último mensaje de la conversación con " + userDif,
-                                    token: utilidadToken.crearToken(username)
-                                });
-                            }
-                            try {
-                                arrayConversaciones[i].LastMessage = result[0].message;
-                                arrayConversaciones[i].FechaMensaje = result[0].fecha;
-                            } catch (err) {
-                                arrayConversaciones[i].FechaMensaje = "";
-                                arrayConversaciones[i].LastMessage = "";
-                            }
-                            collectionUsers.findOne({
-                                username: userDif
-                            }, function(error, result) {
-                                if (error) {
-                                    res.send({
-                                        status: 502, 
-                                        message: "Error al obtener la foto de perfil de " + userDif,
-                                        token: utilidadToken.crearToken(username)
-                                    });
-                                }
-                                arrayConversaciones[i].Imagen = result.imagen;
-                                if (i == ResultadoConversaciones.length - 1){
-                                    res.send({
-                                        status: 302,
-                                        message: "Se encontraron las conversaciones",
-                                        data: arrayConversaciones,
-                                        token: utilidadToken.crearToken(username)
-                                    });
-                                }
-                            });
-                        });
+                        ]
+                    })
+                    .toArray(function (error, result) {
+                        error
+                            ? reject(eror)
+                            : resolve(result)
                     });
-                }
-            } else {
+                });
+            };
+            var callBuscarConversacionesPromise = async() => {
+                var ArrayConversaciones  = await (buscarConversacionesPromise())
+                return ArrayConversaciones;
+            };
+            callBuscarConversacionesPromise().then(function (resultado) {
                 res.send({
-                    status: 404,
-                    message: "No tiene conversaciones",
-                    token: utilidadToken.crearToken(username)
+                    status: 302,
+                    data: resultado
+                });
+            });
+        });
+    } catch (error) {
+        res.send({
+            status: 502,
+            message: "Hubo un error",
+            error: error
+        });
+    }
+});
+
+router.get('/info/:username/:emisor', middlewareJWT.Auth, function(req, res, next){
+    var username = req.params.username;
+    var emisor = req.params.emisor;
+    try{
+        MongoClient.connect(url, function(error, cliente) {
+            if (error) {
+                res.send({
+                status: 502, 
+                message: "Error al conectar con el servidor",
+                token: utilidadToken.crearToken(username)
                 });
             }
+            var dataBase = cliente.db(dbName);
+            var buscarConversacionesPromise = () => {
+                return new Promise((resolve, reject) => {
+                    dataBase.
+                        collection('mensajes')
+                        .find({
+                            receptor: username,
+                            emisor: emisor
+                        })
+                        .count(function (error, result) {
+                            error
+                                ? reject(eror)
+                                : resolve(result)
+                        });
+                });
+            };
+            var callBuscarConversacionesPromise = async() => {
+                var ArrayConversaciones  = await (buscarConversacionesPromise())
+                return ArrayConversaciones;
+            };
+            callBuscarConversacionesPromise().then(function (resultado) {
+                res.send({
+                    status: 302,
+                    data: resultado
+                });
+            });
         });
-    });
+    } catch (error) {
+        res.send({
+            status: 502,
+            message: "Hubo un error",
+            error: error
+        });
+    }
 });
 
 module.exports = router;
