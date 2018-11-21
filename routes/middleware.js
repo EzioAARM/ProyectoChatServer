@@ -4,7 +4,7 @@ var config = require('./config');
 
 exports.Auth = function(req, res, next) {
     if(!req.headers.authorization) {
-        return res.send({status: 403, message: "Tu petición no tiene cabecera de autorización"});
+        return res.send({status: 403, message: "No está autenticado"});
     }
 
     var token = req.headers.authorization.split(" ")[1];

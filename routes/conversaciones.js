@@ -102,16 +102,20 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
             }
             if (result) {
                 var arrayConversaciones = new Array();
-                var jsonAgregar = {};
+                result.forEach(function(dato) {
+                    arrayConversaciones.push({});
+                });
                 var userDif = "";
-                result.forEach(function(JsonActual) {
+                var ResultadoConversaciones = result;
+                for (let i = 0; i < result.length; i++) {
+                    const JsonActual = result[i];
                     if (JsonActual.user1 === username){
                         userDif = JsonActual.user2;
                     } else {
                         userDif = JsonActual.user1;
                     }
-                    jsonAgregar.ConversationId = JsonActual._id;
-                    jsonAgregar.Emisor = userDif;
+                    arrayConversaciones[i].ConversationId = JsonActual._id;
+                    arrayConversaciones[i].Emisor = userDif;
                     // Obtener cantidad de mensajes no leidos
                     collection.find({
                         idConversation: JsonActual._id,
@@ -128,9 +132,9 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                         result.forEach(function(elemento){
                             cont = cont + 1;
                         });
-                        jsonAgregar.Nuevos = cont;
+                        arrayConversaciones[i].Nuevos = cont;
                         collectionMensajes.find({
-                            idConversation: jsonAgregar.ConversationId
+                            idConversation: arrayConversaciones[i].ConversationId
                         },
                         {
                             $orderby: {
@@ -145,11 +149,11 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                                 });
                             }
                             try {
-                                jsonAgregar.LastMessage = result[0].message;
-                                jsonAgregar.FechaMensaje = result[0].fecha;
+                                arrayConversaciones[i].LastMessage = result[0].message;
+                                arrayConversaciones[i].FechaMensaje = result[0].fecha;
                             } catch {
-                                jsonAgregar.FechaMensaje = "";
-                                jsonAgregar.LastMessage = "";
+                                arrayConversaciones[i].FechaMensaje = "";
+                                arrayConversaciones[i].LastMessage = "";
                             }
                             collectionUsers.findOne({
                                 username: userDif
@@ -161,19 +165,20 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                                         token: utilidadToken.crearToken(username)
                                     });
                                 }
-                                jsonAgregar.Imagen = result.imagen;
-                                console.log(jsonAgregar);
+                                arrayConversaciones[i].Imagen = result.imagen;
+                                console.log(arrayConversaciones[i]);
+                                if (i == ResultadoConversaciones.length - 1){
+                                    res.send({
+                                        status: 302,
+                                        message: "Se encontraron las conversaciones",
+                                        data: arrayConversaciones,
+                                        token: utilidadToken.crearToken(username)
+                                    });
+                                }
                             });
                         });
                     });
-                    arrayConversaciones.push(jsonAgregar);
-                });
-                res.send({
-                    status: 302,
-                    message: "Se encontraron las conversaciones",
-                    data: arrayConversaciones,
-                    token: utilidadToken.crearToken(username)
-                });
+                }
             } else {
                 res.send({
                     status: 404,
