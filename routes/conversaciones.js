@@ -168,7 +168,7 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
             };
 
             callBuscarConversacionesPromise().then(function (resultado) {
-                resultado = resultado[0];
+                resultado = resultado[1];
                 var userDif = resultado.user1;
                 if (userDif === username) {
                     userDif = resultado.user2;
