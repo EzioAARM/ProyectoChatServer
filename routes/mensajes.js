@@ -15,7 +15,7 @@ const dbName = "ChatProject";
 router.get('/:emisor', function(req, res) {
 var emisor = req.params.emisor;
   MongoClient.connect(url, function(err, client) {
-    var collection = client.db(dbName).collection("usuarios");
+    var collection = client.db(dbName).collection("mensajes");
     collection.find({emisor:emisor}).toArray(function(err, documento){
       if (err){
         res.send(404);
@@ -36,7 +36,7 @@ router.get('/:emisor/:receptor', function(req, res) {
   var receptor = req.params.receptor;
   var clave = req.params.clave;
   MongoClient.connect(url, function(err, client) {
-    var collection = client.db(dbName).collection("usuarios");
+    var collection = client.db(dbName).collection("mensajes");
     collection.find({emisor:emisor, receptor:receptor}).toArray(function(err, documento){
       if (err){
         res.send(404);
@@ -56,7 +56,7 @@ router.get('/:emisor/:clave', function(req, res) {
   var emisor = req.params.emisor;
   var clave = req.params.clave;
     MongoClient.connect(url, function(err, client) {
-      var collection = client.db(dbName).collection("usuarios");
+      var collection = client.db(dbName).collection("mensajes");
       collection.find({emisor:emisor,mensaje:{$regex : clave}}).toArray(function(err, documento){
         if (err){
           res.send(404);
@@ -77,7 +77,7 @@ router.get('/:emisor/:receptor/:clave', function(req, res) {
   var receptor = req.params.receptor;
   var clave = req.params.clave;
   MongoClient.connect(url, function(err, client) {
-    var collection = client.db(dbName).collection("usuarios");
+    var collection = client.db(dbName).collection("mensajes");
     collection.find({emisor:emisor, receptor:receptor,mensaje:{$regex : clave}}).toArray(function(err, documento){
       if (err){
         res.send(404);
@@ -106,7 +106,7 @@ router.post('/', function(req, res) {
     horaEnviado : req.body.horaEnviado
   };
   MongoClient.connect(url, function(err, client) {
-    var collection = client.db(dbName).collection("usuarios");
+    var collection = client.db(dbName).collection("mensajes");
     collection.findOne({username: req.body.receptor}, function(err, result) {
       if (err){ 
       res.send({status: 502});
@@ -162,7 +162,7 @@ io.on('connection', (socket) => {
       horaEnviado : horaEnviado
     };
     MongoClient.connect(url, function(err, client) {
-      var collection = client.db(dbName).collection("usuarios");
+      var collection = client.db(dbName).collection("mensajes");
       collection.findOne({username: emisor}, function(err, result) {
         if (err){ 
         res.send({status: 502});
@@ -212,7 +212,7 @@ router.post('/upload', function(req, res){
       'ruta'  : ruta
     };
     MongoClient.connect(url, function(err, client) {
-      var collection = client.db(dbName).collection("usuarios");
+      var collection = client.db(dbName).collection("mensajes");
       collection.insertOne(json, function(err, result){
         if (err){
           res.send(502);
@@ -235,7 +235,7 @@ router.get('/upload/:nombre', function(req, res){
   var name = req.params.nombre;
   
   MongoClient.connect(url, function(err, client) {
-    var collection = client.db(dbName).collection("usuarios");
+    var collection = client.db(dbName).collection("mensajes");
     collection.FindOne({nombre:name}, function(err, result){
       if (err){
         res.send(502);
