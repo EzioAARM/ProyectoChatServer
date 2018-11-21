@@ -72,6 +72,61 @@ router.get('/buscarExacto/:user', function(req, res) {
   });
 });
 
+router.get('/mostrar/:user', function(req, res) {
+  var user = req.params.user;
+  try {
+    MongoClient.connect(url, function(err, client) {
+      if (err) {
+        res.send({
+        status: 502, 
+        message: "Hubo un error conectandose a la base de datos",
+        token: utilidadToken.crearToken(user)
+        });
+      }
+      var dataBase = client.db(dbName);
+      var buscarPerfilPromise = () => {
+        return new Promise((resolve, reject) => {
+          dataBase
+            .collection("usuarios")
+            .findOne({
+              username: user
+            }, function(error, result){
+              error
+                ? reject(error)
+                : resolve(result);
+            });
+        });
+      };
+      
+      var callBuscarPerfilPromise = async() => {
+        var data = await (buscarPerfilPromise());
+        return data;
+      };
+      callBuscarPerfilPromise().then(function (resultado) {
+        console.log(resultado);
+        
+        res.send({
+          status: 302,
+          message: "Perfil encontrado con éxito",
+          username: resultado.username,
+          nombre: resultado.nombre,
+          apellido: resultado.apellido,
+          fechaNacimiento: resultado.fechaNacimiento,
+          correo: resultado.correo,
+          telefono: resultado.telefono,
+          imagen: resultado.imagen
+        });
+      });
+    });
+  } catch (error) {
+    res.send({
+      status: 502,
+      message: "Hubo un error",
+      error: error
+    });
+  }
+});
+
 router.get('/buscarImagenPerfil/:user', middlewareJWT.Auth, function(req, res) {
   var user = req.params.user;
   try {
