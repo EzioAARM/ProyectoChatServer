@@ -135,6 +135,7 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                         result.forEach(function(elemento){
                             cont++;
                         });
+                        console.log(arrayConversaciones);
                         arrayConversaciones[i].Nuevos = cont;
                         collectionMensajes.find({
                             idConversation: arrayConversaciones[i].ConversationId
