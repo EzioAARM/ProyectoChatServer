@@ -153,7 +153,7 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                             try {
                                 arrayConversaciones[i].LastMessage = result[0].message;
                                 arrayConversaciones[i].FechaMensaje = result[0].fecha;
-                            } catch {
+                            } catch (err) {
                                 arrayConversaciones[i].FechaMensaje = "";
                                 arrayConversaciones[i].LastMessage = "";
                             }
