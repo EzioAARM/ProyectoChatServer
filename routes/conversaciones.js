@@ -83,7 +83,7 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
             });
         }
         var collection = cliente.db(dbName).collection("conversaciones");
-        var collectionMensajes = cliente.db(dbName).collection("conversaciones");
+        var collectionMensajes = cliente.db(dbName).collection("mensajes");
         var collectionUsers = cliente.db(dbName).collection("usuarios");
         collection.find({
             $or: [ {
@@ -116,11 +116,13 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                     }
                     arrayConversaciones[i].ConversationId = JsonActual._id;
                     arrayConversaciones[i].Emisor = userDif;
+                    var idBusqueda = JsonActual._id;
                     // Obtener cantidad de mensajes no leidos
-                    collection.find({
-                        idConversation: JsonActual._id,
-                        leido: true
-                    }, function(error, result) {
+                    collectionMensajes.find({
+                        leido: false,
+                        emisor: userDif,
+                        idConversacion: new ObjectID(idBusqueda)
+                    }).toArray(function(error, result) {
                         if (error) {
                             res.send({
                             status: 502, 
@@ -130,7 +132,7 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                         }
                         var cont = 0;
                         result.forEach(function(elemento){
-                            cont = cont + 1;
+                            cont++;
                         });
                         arrayConversaciones[i].Nuevos = cont;
                         collectionMensajes.find({
@@ -166,7 +168,6 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
                                     });
                                 }
                                 arrayConversaciones[i].Imagen = result.imagen;
-                                console.log(arrayConversaciones[i]);
                                 if (i == ResultadoConversaciones.length - 1){
                                     res.send({
                                         status: 302,

@@ -11,19 +11,23 @@ var formidable = require('formidable');
 const url = 'mongodb+srv://roma:1A2basdf@chatdb-53u3w.mongodb.net/test?retryWrites=true';
 const dbName = "ChatProject";
 
-/* GET home page. */
 router.get('/:emisor', function(req, res) {
 var emisor = req.params.emisor;
   MongoClient.connect(url, function(err, client) {
     var collection = client.db(dbName).collection("mensajes");
-    collection.find({emisor:emisor}).toArray(function(err, documento){
+    collection.find({
+      emisor:emisor
+    }).toArray(function(err, documento){
       if (err){
-        res.send(404);
+        res.send({
+          status: 502,
+          message: "Hubo un error al obtener los mensajes"
+        });
       }
       else {
         res.send({
           data: documento,
-          status: 200
+          status: 302
         });
       }
     });
