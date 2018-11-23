@@ -67,7 +67,9 @@ router.get('/buscar/:user', function(req, res) {
             if (resultado == null) {
                 res.status(404).send();
             } else {
-                res.status(200).send();
+                res.status(200).send(
+                    resultado
+                );
             }
         }).catch((error) => {
             res.status(500).send();
