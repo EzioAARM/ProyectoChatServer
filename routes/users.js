@@ -117,6 +117,44 @@ router.get('/:user', middlewareJWT.Auth, function(req, res) {
     });
 });
 
+// Función de obtener usuarios
+router.get('/all/:user', middlewareJWT.Auth, function(req, res) {
+    var user = req.params.user;
+    MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, client) {
+        if (error) {
+            res.status(502).send({
+                token: utilidadToken.crearToken(user)
+            });
+        }
+        var dataBase = client.db(settings.DB_NAME);
+        var buscarPerfilPromise = () => {
+            return new Promise((resolve, reject) => {
+                dataBase
+                    .collection(settings.UsersCollection)
+                    .find({}).toArray(function(error, result) {
+                        error
+                        ? reject(error)
+                        : resolve(result);
+                    });
+            });
+        };
+
+        var callBuscarPerfilPromise = async() => {
+            var data = await (buscarPerfilPromise());
+            return data;
+        };
+        callBuscarPerfilPromise().then(function (resultado) {
+            resultado.token = utilidadToken.crearToken(user);
+            client.close();
+            res.status(200).send(
+                resultado
+            );
+        }).catch(function(error) {
+            res.status(502).send();
+        });
+    });
+});
+
 // Registra un usuario
 router.post('/registrar', function(req, res, next) {
     var username = req.body.user;
