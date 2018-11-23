@@ -112,9 +112,7 @@ router.get('/:user', middlewareJWT.Auth, function(req, res) {
                 resultado
             );
         }).catch(function(error) {
-            res.status(502).send(
-                error
-            );
+            res.status(502).send();
         });
     });
 });
