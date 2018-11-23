@@ -221,7 +221,7 @@ router.post('/upload', function(req, res){
         else {
           res.send({
             status: 200,
-            data: json
+            data: result
           });
         }
       });
@@ -230,28 +230,25 @@ router.post('/upload', function(req, res){
   });
 });
 
-router.get('/upload/:nombre', function(req, res){
-  var ruta = "";
-  var name = req.params.nombre;
-  
-  MongoClient.connect(url, function(err, client) {
-    var collection = client.db(dbName).collection("usuarios");
-    collection.FindOne({nombre:name}, function(err, result){
-      if (err){
-        res.send(502);
-        console.log(err);
-      }
-      else {
-        res.send({
-          status: 200,
-          data: result
-        });
-        ruta = result.ruta;
-      }
+router.get('/download/:nombre', function(req, res) {
+    var name = req.params.nombre;
+    MongoClient.connect(url, function(err, client) {
+      var collection = client.db(dbName).collection("usuarios");
+      collection.findOne({nombre:name},function(err, documento){
+        if (err){
+          res.send(404);
+        }
+        else {
+          res.send({
+            status: 200,
+            data: documento
+          });
+        }
+      });
+      client.close();
     });
-    client.close();
   });
-});
+
 
 server.listen(3001, function(){
 
