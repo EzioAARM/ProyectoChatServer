@@ -65,7 +65,9 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
                             token: utilidadToken.crearToken(user1)
                         });
                     } else {
-                        res.status(201).send();
+                        res.status(201).send({
+                            token: utilidadToken.crearToken(user1)
+                        });
                     }
                 });
         }).catch((error) => {
