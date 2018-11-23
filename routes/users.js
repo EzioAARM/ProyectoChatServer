@@ -30,7 +30,7 @@ router.get('/login/:user/:password', function(req, res, next) {
                 if (!result) {
                     res.status(404);
                 } else {
-                    res.status(200).send({
+                    res.status(202).send({
                         token: utilidadToken.crearToken(user)
                     });
                 }
