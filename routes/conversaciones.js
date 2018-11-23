@@ -13,7 +13,6 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
     var esGrupo = req.body.esGrupo;
     var fotoUser1 = req.body.fotoUser1;
     var fotoUser2 = req.body.fotoUser2;
-    var username = user1;
     MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, cliente) {
         if (error) {
             res.status(502).send({
@@ -22,21 +21,25 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
         }
         var dataBase = cliente.db(settings.DB_NAME);
         var buscarConversacionExistentePromise = () => {
-            dataBase.findOne({
-                $or: [ {
-                        user1: {
-                            $in: [user1, user2]
-                        }
-                    }, {
-                        user2: {
-                            $in: [user1, user2]
-                        }
-                    }
-                ]
-            }, function(error, result) {
-                error
-                    ? reject(error)
-                    : resolve(result)
+            return new Promise((resolve, reject) => {
+                dataBase
+                    .collection(settings.ConversationsCollection)
+                    .findOne({
+                        $or: [ {
+                                user1: {
+                                    $in: [user1, user2]
+                                }
+                            }, {
+                                user2: {
+                                    $in: [user1, user2]
+                                }
+                            }
+                        ]
+                    }, function(error, result) {
+                        error
+                            ? reject(error)
+                            : resolve(result)
+                    });
             });
         };
         var callBuscarConversacionExistentePromise = async() => {
@@ -61,6 +64,8 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
                         res.status(502).send({
                             token: utilidadToken.crearToken(user1)
                         });
+                    } else {
+                        res.status(201).send();
                     }
                 });
         }).catch((error) => {
