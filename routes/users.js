@@ -170,34 +170,36 @@ router.post('/registrar', function(req, res, next) {
         }
         var dataBase = cliente.db(settings.DB_NAME);
         dataBase
-        .collections(settings.UsersCollection)
-        .findOne({
-            username: username
-        }, function(error, result) {
-            if (result) {
-                res.status(502).send();
-            } else {
-                if (!result) {
-                    collection.insertOne({
-                        username: username,
-                        password: password,
-                        nombre: nombre,
-                        apellido: apellido,
-                        fechaNacimiento: fechaNacimiento,
-                        correo: correo,
-                        telefono: telefono,
-                        activo: true
-                    }, function(error, result) {
-                        if (error) {
-                            res.status(502).send();
-                        } else {
-                            res.status(201).send();
-                        }
-                        cliente.close();
-                    });
+            .collection(settings.UsersCollection)
+            .findOne({
+                    username: username
+                }, function(error, result) {
+                if (error) {
+                    res.status(502).send();
+                } else {
+                    if (!result) {
+                        dataBase
+                        .collection(settings.UsersCollection)
+                        .insertOne({
+                            username: username,
+                            password: password,
+                            nombre: nombre,
+                            apellido: apellido,
+                            fechaNacimiento: fechaNacimiento,
+                            correo: correo,
+                            telefono: telefono,
+                            activo: true
+                        }, function(error, result) {
+                            if (error) {
+                                res.status(502).send();
+                            } else {
+                                res.status(201).send();
+                            }
+                            cliente.close();
+                        });
+                    }
                 }
-            }
-        });
+            });
     });
 });
 
