@@ -39,7 +39,7 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
                     : resolve(result)
             });
         };
-        var callBuscarConversacionExistentePromise = () => {
+        var callBuscarConversacionExistentePromise = async() => {
             var data = await (buscarConversacionExistentePromise());
             return data;
         };
