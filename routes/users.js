@@ -169,7 +169,9 @@ router.post('/registrar', function(req, res, next) {
             res.status(502).send();
         }
         var dataBase = cliente.db(settings.DB_NAME);
-        dataBase.findOne({
+        dataBase
+        .collection(settings.UsersCollection)
+        .findOne({
             username: username
         }, function(error, result) {
             if (result) {
