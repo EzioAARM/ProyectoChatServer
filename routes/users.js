@@ -25,16 +25,12 @@ router.get('/login/:user/:password', function(req, res, next) {
                 password: password
             }, function(error, result) {
                 if (error) {
-                    res.status(502).send({
-                        token: ""
-                    });
+                    res.status(502);
                 }
                 if (!result) {
-                    res.status(404).send({
-                        token: ""
-                    });
+                    res.status(404);
                 } else {
-                    res.status(301).send({
+                    res.status(204).send({
                         token: utilidadToken.crearToken(user)
                     });
                 }
@@ -70,7 +66,7 @@ router.get('/buscar/:user', function(req, res) {
         };
         callBuscarExactoPromise().then((resultado) => {
             client.close();
-            res.status(302).send(
+            res.status(200).send(
                 resultado
             );
         }).catch((error) => {
@@ -110,7 +106,7 @@ router.get('/:user', function(req, res) {
         callBuscarPerfilPromise().then(function (resultado) {
             resultado.token = utilidadToken.crearToken(user);
             client.close();
-            res.status(302).send(
+            res.status(200).send(
                 resultado
             );
         }).catch(function(error) {
