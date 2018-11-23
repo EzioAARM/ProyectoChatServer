@@ -105,19 +105,15 @@ router.get('/:user', middlewareJWT.Auth, function(req, res) {
             var data = await (buscarPerfilPromise());
             return data;
         };
-        try {
-            callBuscarPerfilPromise().then(function (resultado) {
-                resultado.token = utilidadToken.crearToken(user);
-                client.close();
-                res.status(200).send(
-                    resultado
-                );
-            }).catch(function(error) {
-                res.status(502).send();
-            });
-        } catch (error) {
-            res.status(500).send(error);
-        }
+        callBuscarPerfilPromise().then(function (resultado) {
+            resultado.token = utilidadToken.crearToken(user);
+            client.close();
+            res.status(200).send(
+                resultado
+            );
+        }).catch(function(error) {
+            res.status(502).send();
+        });
     });
 });
 
