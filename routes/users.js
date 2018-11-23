@@ -13,9 +13,7 @@ router.get('/login/:user/:password', function(req, res, next) {
     var password = req.params.password;
     MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, cliente) {
         if (error) {
-            res.status(502).send({
-                token: ""
-            });
+            res.status(502).send();
         }
         var dataBase = cliente.db(settings.DB_NAME);
         dataBase
@@ -25,10 +23,10 @@ router.get('/login/:user/:password', function(req, res, next) {
                 password: password
             }, function(error, result) {
                 if (error) {
-                    res.status(502);
+                    res.status(502).send();
                 }
                 if (!result) {
-                    res.status(404);
+                    res.status(404).send();
                 } else {
                     res.status(202).send({
                         token: utilidadToken.crearToken(user)
@@ -44,7 +42,7 @@ router.get('/buscar/:user', function(req, res) {
     var user = req.params.user;
     MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, client) {
         if (error) {
-            res.status(502);
+            res.status(502).send();
         }
         var dataBase = client.db(settings.DB_NAME);
         var buscarExactoPromise = () => {
@@ -66,17 +64,19 @@ router.get('/buscar/:user', function(req, res) {
         };
         callBuscarExactoPromise().then((resultado) => {
             client.close();
-            res.status(200).send(
-                resultado
-            );
+            if (resultado == null) {
+                res.status(404).send();
+            } else {
+                res.status(200).send();
+            }
         }).catch((error) => {
-            res.status(502);
+            res.status(404).send();
         });
     });
 });
 
 // Función de mostrar usuarios
-router.get('/:user', function(req, res) {
+router.get('/:user', middlewareJWT.Auth, function(req, res) {
     var user = req.params.user;
     MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, client) {
         if (error) {
@@ -110,7 +110,7 @@ router.get('/:user', function(req, res) {
                 resultado
             );
         }).catch(function(error) {
-            res.status(502);
+            res.status(502).send();
         });
     });
 });
@@ -126,14 +126,14 @@ router.post('/registrar', function(req, res, next) {
     var telefono = req.body.telefono;
     MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, cliente) {
         if (error) {
-            res.status(502);
+            res.status(502).send();
         }
         var dataBase = cliente.db(settings.DB_NAME);
         dataBase.findOne({
             username: username
         }, function(error, result) {
             if (result) {
-                res.status(502);
+                res.status(502).send();
             } else {
                 if (!result) {
                     collection.insertOne({
@@ -147,9 +147,9 @@ router.post('/registrar', function(req, res, next) {
                         activo: true
                     }, function(error, result) {
                         if (error) {
-                            res.status(502);
+                            res.status(502).send();
                         } else {
-                            res.status(201);
+                            res.status(201).send();
                         }
                         cliente.close();
                     });
@@ -205,29 +205,36 @@ router.delete('/:user', middlewareJWT.Auth, function(req, res){
             res.status(200).send({
                 token: utilidadToken.crearToken(username)
             });
+        }).catch(function(error) {
+            res.status(500).send();
         });  
     });
 });
 
-router.put('recuperar/:user', function(req, res){
+// Cambia la contraseña
+router.put('/recuperar/:user', function(req, res){
     var username = req.params.user;
     var password = req.body.password;
-    MongoClient.connect(url, function(error, cliente) {
+    MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, cliente) {
         if (error) {
-            res.status(502).send({
-                token: utilidadToken.crearToken(username)
-            });
+            res.status(502);
         }
-        var dataBase = cliente.db(settings.DB_CONNECTION_STRING);
-        dataBase.findOneAndUpdate({
-            username: username
-        }, {
-            password: password
-        }).then(function(updatedDocument) {
-            res.status(200).send({
-                token: utilidadToken.crearToken(username)
-            });
-        });  
+        var dataBase = cliente.db(settings.DB_NAME);
+        dataBase
+            .collection(settings.UsersCollection)
+            .findOneAndUpdate({
+                "username": username
+            }, {
+                $set: {
+                    "password": password
+                }
+            }, function(error, updatedDocument) {
+                if (error) {
+                    res.status(500).send();
+                } else {
+                    res.status(200).send();
+                }
+            });  
     });
 });
 
