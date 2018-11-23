@@ -131,7 +131,7 @@ router.get('/all/:user', middlewareJWT.Auth, function(req, res) {
             return new Promise((resolve, reject) => {
                 dataBase
                     .collection(settings.UsersCollection)
-                    .find({}).toArray(function(error, result) {
+                    .find().toArray(function(error, result) {
                         error
                         ? reject(error)
                         : resolve(result);
