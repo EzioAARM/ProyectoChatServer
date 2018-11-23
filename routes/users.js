@@ -13,7 +13,9 @@ router.get('/login/:user/:password', function(req, res, next) {
     var password = req.params.password;
     MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, cliente) {
         if (error) {
-            res.status(502);
+            res.status(502).send({
+                token: ""
+            });
         }
         var dataBase = cliente.db(settings.DB_NAME);
         dataBase
@@ -23,10 +25,14 @@ router.get('/login/:user/:password', function(req, res, next) {
                 password: password
             }, function(error, result) {
                 if (error) {
-                    res.status(502);
+                    res.status(502).send({
+                        token: ""
+                    });
                 }
                 if (!result) {
-                    res.status(404);
+                    res.status(404).send({
+                        token: ""
+                    });
                 } else {
                     res.status(301).send({
                         token: utilidadToken.crearToken(user)
