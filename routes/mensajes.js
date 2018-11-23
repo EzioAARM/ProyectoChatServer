@@ -246,13 +246,15 @@ router.get('/upload/:nombre', function(req, res){
         console.log(err);
       }
       else {
-        res.send({
-          status: 200,
-          data: result
-        });
         ruta = result.ruta;
+        console.log(ruta);
       }
     });
+  });
+  res.download(ruta,function(err){
+    if(err){
+      console.log(err);
+    }
   });
 });
 
