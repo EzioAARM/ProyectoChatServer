@@ -70,7 +70,7 @@ router.get('/buscar/:user', function(req, res) {
                 res.status(200).send();
             }
         }).catch((error) => {
-            res.status(404).send();
+            res.status(500).send();
         });
     });
 });
