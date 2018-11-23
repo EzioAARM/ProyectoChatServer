@@ -10,7 +10,7 @@ exports.Auth = function(req, res, next) {
     var token = req.headers.authorization.split(" ")[1];
     var payload = jwt.decode(token, config.TOKEN_SECRET);
     if(payload.exp <= moment().unix()) {
-        return res.status(401);
+        return res.status(401).send();
     }
     req.user = payload.sub;
     next();

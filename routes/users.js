@@ -86,7 +86,7 @@ router.get('/:user', middlewareJWT.Auth, function(req, res) {
                 token: utilidadToken.crearToken(user)
             });
         }
-        var dataBase = client.db(dbName);
+        var dataBase = client.db(settings.DB_NAME);
         var buscarPerfilPromise = () => {
             return new Promise((resolve, reject) => {
                 dataBase
