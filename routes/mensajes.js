@@ -181,7 +181,7 @@ client.close();
 });
 });
 
-io.on('connection', (socket) => {
+/*io.on('connection', (socket) => {
     socket.on('join', function(username) {
         console.log(username +" : has joined the chat "  );
     });
@@ -210,9 +210,7 @@ io.on('connection', (socket) => {
                     res.send({status: 502});
                 }
                 if (!result){
-                    res.send({
-                    status: 404
-                    });
+                    res.send({ status: 404 });
                 } else {
                     collection.insertOne(json, function(err, result){
                         if (err){
@@ -230,37 +228,34 @@ io.on('connection', (socket) => {
             //aqui estaba antes
         });
     });
-
-router.get('/upload/:nombre', function(req, res){
-  var ruta = "";
-  var name = req.params.nombre;
-  
-  MongoClient.connect(url, function(err, client) {
-    var collection = client.db(dbName).collection("mensajes");
-    collection.FindOne({nombre:name}, function(err, result){
-      if (err){
-        res.send(502);
-        console.log(err);
-      }
-      else {
-        ruta = result.ruta;
-        console.log(ruta);
-      }
+    router.get('/upload/:nombre', function(req, res){
+        var ruta = "";
+        var name = req.params.nombre;
+        
+        MongoClient.connect(url, function(err, client) {
+          var collection = client.db(dbName).collection("mensajes");
+          collection.FindOne({nombre:name}, function(err, result){
+            if (err){
+              res.send(502);
+              console.log(err);
+            }
+            else {
+              ruta = result.ruta;
+              console.log(ruta);
+            }
+          });
+        });
+        res.download(ruta,function(err){
+          if(err){
+            console.log(err);
+          }
+        });
+          socket.on('disconnect', function(username) {
+          console.log(username +' has left ')
+          });
+      });
+    server.listen(3001, function(){
+        console.log('Socket running on port 3001');n
     });
-  });
-  res.download(ruta,function(err){
-    if(err){
-      console.log(err);
-    }
-  });
-    socket.on('disconnect', function(username) {
-    console.log(username +' has left ')
-    });
-});
-
-
-server.listen(3001, function(){
-    console.log('Socket running on port 3001')
-});
-
+}*/
 module.exports = router;
