@@ -25,7 +25,7 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
                 dataBase
                     .collection(settings.ConversationsCollection)
                     .findOne({
-                        $or: [ {
+                        $and: [ {
                                 user1: {
                                     $in: [user1, user2]
                                 }
