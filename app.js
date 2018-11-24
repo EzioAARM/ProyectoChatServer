@@ -8,6 +8,7 @@ var mensajesRouter = require('./routes/mensajes');
 var usersRouter = require('./routes/users');
 var conversacionesRouter = require('./routes/conversaciones');
 var busquedasRouter = require('./routes/busquedas');
+var archivosRouter = require('./routes/archivos');
 
 var app = express();
 
@@ -25,6 +26,7 @@ app.use('/users', usersRouter);
 app.use('/mensajes', mensajesRouter);
 app.use('/busquedas', busquedasRouter);
 app.use('/conversaciones', conversacionesRouter);
+app.use('/archivos', archivosRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -42,63 +42,6 @@ router.get('/:username/:conversacion', function(req, res) {
     });
 });
 
-router.post('/upload', function(req, res){
-    var ruta = "";
-    var nombre = "";
-    var form = new formidable.IncomingForm();
-    form.type = true;
-    form.parse(req);
-    form.on('fileBegin', function(name, file){
-        file.path = __dirname + '\\uploads\\' + file.name;
-        ruta = file.path;
-        nombre = file.name;
-    });
-    form.on('end', function(){
-        var json = {
-            'nombre': nombre,
-            'ruta'  : ruta
-        };
-        MongoClient.connect(url, function(err, client) {
-            var collection = client.db(dbName).collection("mensajes");
-            collection.insertOne(json, function(err, result){
-                if (err){
-                    res.send(502);
-                    console.log(err);
-                } else {
-                    res.send({
-                    status: 200,
-                    data: json
-                    });
-                }
-            });
-            client.close();
-        });
-    });
-});
-
-router.get('/upload/:nombre', function(req, res){
-var ruta = "";
-var name = req.params.nombre;
-
-MongoClient.connect(url, function(err, client) {
-var collection = client.db(dbName).collection("mensajes");
-collection.FindOne({nombre:name}, function(err, result){
-if (err){
-res.send(502);
-console.log(err);
-}
-else {
-res.send({
-status: 200,
-data: result
-});
-ruta = result.ruta;
-}
-});
-client.close();
-});
-});
-
 router.get('/:emisor/:clave', function(req, res) {
 var emisor = req.params.emisor;
 var clave = req.params.clave;
@@ -181,7 +124,7 @@ client.close();
 });
 });
 
-/*io.on('connection', (socket) => {
+io.on('connection', (socket) => {
     socket.on('join', function(username) {
         console.log(username +" : has joined the chat "  );
     });
@@ -228,34 +171,10 @@ client.close();
             //aqui estaba antes
         });
     });
-    router.get('/upload/:nombre', function(req, res){
-        var ruta = "";
-        var name = req.params.nombre;
-        
-        MongoClient.connect(url, function(err, client) {
-          var collection = client.db(dbName).collection("mensajes");
-          collection.FindOne({nombre:name}, function(err, result){
-            if (err){
-              res.send(502);
-              console.log(err);
-            }
-            else {
-              ruta = result.ruta;
-              console.log(ruta);
-            }
-          });
-        });
-        res.download(ruta,function(err){
-          if(err){
-            console.log(err);
-          }
-        });
-          socket.on('disconnect', function(username) {
-          console.log(username +' has left ')
-          });
-      });
-    server.listen(3001, function(){
-        console.log('Socket running on port 3001');n
-    });
-}*/
+});
+
+server.listen(3001, function(){
+    console.log('Socket running on port 3001');
+});
+
 module.exports = router;
