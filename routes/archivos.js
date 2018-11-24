@@ -24,7 +24,7 @@ router.post('/upload', function(req, res){
     form.type = true;
     form.parse(req);
     form.on('fileBegin', function(name, file){
-        file.path = __dirname + '\\uploads\\' + file.name;
+        file.path = __dirname + '\\uploads\\' + moment.unix() + file.name;
         ruta = file.path;
         nombre = file.name;
     });
@@ -37,7 +37,7 @@ router.post('/upload', function(req, res){
             var collection = client.db(settings.DB_NAME).collection(settings.FilesCollection);
             collection.insertOne(json, function(err, result){
                 if (err){
-                    res.status.send(502).send({
+                    res.status(502).send({
                         token: utilidadToken.crearToken(username)   
                     });
                     console.log(err);

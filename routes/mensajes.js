@@ -62,8 +62,8 @@ io.on('connection', (socket) => {
             hayGrupo : hayGrupo,
             leido : leido,
             idConversacion: new ObjectID(idConversacion),
-            fechaEnviado : moment.unix().format("DD/MM/YY"),
-            horaEnviado: moment.unix().format("HH:mm")
+            fechaEnviado : moment.unix(),
+            horaEnviado: moment.unix()
         };
         MongoClient.connect(settings.DB_CONNECTION_STRING, function(err, client) {
             var dataBase = client.db(settings.DB_NAME);
@@ -86,6 +86,7 @@ io.on('connection', (socket) => {
                                 nuevos: 1
                             }
                         }, function(error, updatedDocument) {
+                            json.token = utilidadToken.crearToken(emisor);
                             socket.broadcast.emit("RecibirMensaje", json);
                         });
                 });
@@ -94,96 +95,6 @@ io.on('connection', (socket) => {
     socket.on('disconnect', function(){
         console.log("user has left");
         socket.broadcast.emit('userDisconnect', 'has left');
-    });
-});
-
-router.get('/:emisor/:clave', middlewareJWT.Auth, function(req, res) {
-    var emisor = req.params.emisor;
-    var clave = req.params.clave;
-    MongoClient.connect(url, function(err, client) {
-    var collection = client.db(dbName).collection("mensajes");
-    collection.find({emisor:emisor,mensaje:{$regex : clave}}).toArray(function(err, documento){
-        if (err){
-            res.status(404).send({
-                token: utilidadToken.crearToken(emisor)
-            });
-        }
-        else {
-            res.status(200).send({
-                token: utilidadToken.crearToken(emisor),
-                data: documento
-            });
-        }
-    });
-    client.close();
-    });
-});
-
-router.get('/:emisor/:receptor/:clave', middlewareJWT.Auth, function(req, res) {
-    var emisor = req.params.emisor;
-    var receptor = req.params.receptor;
-    var clave = req.params.clave;
-    MongoClient.connect(url, function(err, client) {
-    var collection = client.db(dbName).collection("mensajes");
-    collection.find({emisor:emisor, receptor:receptor,mensaje:{$regex : clave}}).toArray(function(err, documento){
-    if (err){
-        res.status(404).send({
-            token: utilidadToken.crearToken(emisor)
-        });
-    }
-    else {
-        res.status(200).send({
-            token: utilidadToken.crearToken(emisor),
-            data: documento
-        });
-    }
-    });
-    client.close();
-    });
-});
-
-router.post('/', middlewareJWT.Auth, function(req, res) {
-    var json = {
-        emisor : req.body.emisor,
-        receptor : req.body.receptor,
-        mensaje : req.body.mensaje,
-        tieneArchivo : req.body.tieneArchivo,
-        ubicacionArchivo : req.body.ubicacionArchivo,
-        hayGrupo : req.body.hayGrupo,
-        leido : req.body.leido,
-        fechaEnviado : req.body.fechaEnviado,
-        horaEnviado : req.body.horaEnviado
-    };
-    MongoClient.connect(url, function(err, client) {
-    var collection = client.db(dbName).collection("mensajes");
-    collection.findOne({username: req.body.receptor}, function(err, result) {
-    if (err){ 
-        res.status(502).send({
-            token: utilidadToken.crearToken(emisor)
-        });
-    }
-    if (!result){
-        res.status(404).send({
-            token: utilidadToken.crearToken(emisor)
-        });
-    } else {
-    collection.insertOne(json, function(err, result){
-    if (err){
-        res.status(404).send({
-            token: utilidadToken.crearToken(username)
-        });
-    console.log(err);
-    }
-    else {
-        res.status(200).send({
-            token: utilidadToken.crearToken(username)
-        });
-    }
-    });
-    client.close();
-    }
-    });
-    //aqui estaba antes
     });
 });
 
