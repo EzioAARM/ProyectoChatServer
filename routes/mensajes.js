@@ -52,7 +52,7 @@ io.on('connection', (socket) => {
     socket.on('join', function(username) {
         console.log(username + " : has joined the chat");
     });
-    socket.on('EnviarMensaje', (emisor, receptor, mensaje, tieneArchivo, ubicacionArchivo, hayGrupo, leido, idConversacion) => {
+    socket.on('EnviarMensaje', (emisor, receptor, mensaje, tieneArchivo, ubicacionArchivo, hayGrupo, leido, idConversacion, numero) => {
         var json = {
             emisor : emisor,
             receptor : receptor,
@@ -62,8 +62,9 @@ io.on('connection', (socket) => {
             hayGrupo : hayGrupo,
             leido : leido,
             idConversacion: new ObjectID(idConversacion),
-            fechaEnviado : moment.unix(),
-            horaEnviado: moment.unix()
+            fechaEnviado : moment().unix().v,
+            horaEnviado: moment().unix(),
+            numero: numero
         };
         MongoClient.connect(settings.DB_CONNECTION_STRING, function(err, client) {
             var dataBase = client.db(settings.DB_NAME);
