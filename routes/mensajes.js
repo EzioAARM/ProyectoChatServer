@@ -50,12 +50,12 @@ var collection = client.db(dbName).collection("mensajes");
 collection.find({emisor:emisor,mensaje:{$regex : clave}}).toArray(function(err, documento){
     if (err){
         res.status(404).send({
-            token: utilidadToken.crearToken(username)
+            token: utilidadToken.crearToken(emisor)
         });
     }
     else {
         res.status(200).send({
-            token: utilidadToken.crearToken(username),
+            token: utilidadToken.crearToken(emisor),
             data: documento
         });
     }
@@ -72,11 +72,13 @@ MongoClient.connect(url, function(err, client) {
 var collection = client.db(dbName).collection("mensajes");
 collection.find({emisor:emisor, receptor:receptor,mensaje:{$regex : clave}}).toArray(function(err, documento){
 if (err){
-res.send(404);
+    res.status(404).send({
+        token: utilidadToken.crearToken(emisor)
+    });
 }
 else {
     res.status(200).send({
-        token: utilidadToken.crearToken(username),
+        token: utilidadToken.crearToken(emisor),
         data: documento
     });
 }
@@ -102,12 +104,12 @@ var collection = client.db(dbName).collection("mensajes");
 collection.findOne({username: req.body.receptor}, function(err, result) {
 if (err){ 
     res.status(502).send({
-        token: utilidadToken.crearToken(username)
+        token: utilidadToken.crearToken(emisor)
     });
 }
 if (!result){
     res.status(404).send({
-        token: utilidadToken.crearToken(username)
+        token: utilidadToken.crearToken(emisor)
     });
 } else {
 collection.insertOne(json, function(err, result){
