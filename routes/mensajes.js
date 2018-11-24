@@ -42,27 +42,29 @@ router.get('/:username/:conversacion', function(req, res) {
     });
 });
 
-router.get('/:emisor/:clave', function(req, res) {
+router.get('/:emisor/:clave', middlewareJWT.Auth, function(req, res) {
 var emisor = req.params.emisor;
 var clave = req.params.clave;
 MongoClient.connect(url, function(err, client) {
 var collection = client.db(dbName).collection("mensajes");
 collection.find({emisor:emisor,mensaje:{$regex : clave}}).toArray(function(err, documento){
-if (err){
-res.send(404);
-}
-else {
-res.send({
-data: documento,
-status: 200
-});
-}
+    if (err){
+        res.status(404).send({
+            token: utilidadToken.crearToken(username)
+        });
+    }
+    else {
+        res.status(200).send({
+            token: utilidadToken.crearToken(username),
+            data: documento
+        });
+    }
 });
 client.close();
 });
 });
 
-router.get('/:emisor/:receptor/:clave', function(req, res) {
+router.get('/:emisor/:receptor/:clave', middlewareJWT.Auth, function(req, res) {
 var emisor = req.params.emisor;
 var receptor = req.params.receptor;
 var clave = req.params.clave;
@@ -73,17 +75,17 @@ if (err){
 res.send(404);
 }
 else {
-res.send({
-data: documento,
-status: 200
-});
+    res.status(200).send({
+        token: utilidadToken.crearToken(username),
+        data: documento
+    });
 }
 });
 client.close();
 });
 });
 
-router.post('/', function(req, res) {
+router.post('/', middlewareJWT.Auth, function(req, res) {
 var json = {
 emisor : req.body.emisor,
 receptor : req.body.receptor,
@@ -99,22 +101,26 @@ MongoClient.connect(url, function(err, client) {
 var collection = client.db(dbName).collection("mensajes");
 collection.findOne({username: req.body.receptor}, function(err, result) {
 if (err){ 
-res.send({status: 502});
+    res.status(502).send({
+        token: utilidadToken.crearToken(username)
+    });
 }
 if (!result){
-res.send({
-status: 404
-});
+    res.status(404).send({
+        token: utilidadToken.crearToken(username)
+    });
 } else {
 collection.insertOne(json, function(err, result){
 if (err){
-res.send(404);
+    res.status(404).send({
+        token: utilidadToken.crearToken(username)
+    });
 console.log(err);
 }
 else {
-res.send({
-status: 200
-});
+    res.status(200).send({
+        token: utilidadToken.crearToken(username)
+    });
 }
 });
 client.close();

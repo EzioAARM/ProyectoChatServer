@@ -11,20 +11,15 @@ var utilidadToken = require('./services');
 var settings = require('./config');
 var moment = require('moment');
 
-router.get('/download/:nombre',function(req, res){
+router.get('/download/:username/:nombre', middlewareJWT.Auth, function(req, res){
     var ruta =  __dirname + '\\uploads\\' + req.params.nombre;
-    res.download(ruta, function(err){
-        if(err){
-            res.send({
-                status: 404  
-            });
-        }
-    });
+    res.download(ruta);
 });
 
 router.post('/upload', function(req, res){
     var ruta = "";
     var nombre = "";
+    var username = req.body.username;
     var form = new formidable.IncomingForm();
     form.type = true;
     form.parse(req);
@@ -39,17 +34,16 @@ router.post('/upload', function(req, res){
             'ruta'  : ruta
         };
         MongoClient.connect(settings.DB_CONNECTION_STRING, function(err, client) {
-            var collection = client.db(settings.DB_NAME).collection(settings.MessagesCollection);
+            var collection = client.db(settings.DB_NAME).collection(settings.FilesCollection);
             collection.insertOne(json, function(err, result){
                 if (err){
-                    res.send({
-                        status: 502    
+                    res.status.send(502).send({
+                        token: utilidadToken.crearToken(username)   
                     });
                     console.log(err);
                 } else {
-                    res.send({
-                    status: 200,
-                    data: json
+                    res.status(200).send({
+                        token : utilidadToken.crearToken(username)
                     });
                 }
             });

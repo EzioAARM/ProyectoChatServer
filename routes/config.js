@@ -5,5 +5,6 @@ module.exports = {
     UsersCollection: "usuarios",
     ConversationsCollection: "conversaciones",
     MessagesCollection: "mensajes",
-    GroupsCollection: "grupos"
+    GroupsCollection: "grupos",
+    FilesCollection: "archivos"
 };
