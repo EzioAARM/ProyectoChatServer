@@ -81,7 +81,8 @@ io.on('connection', (socket) => {
                         }, {
                             $set: {
                                 ultimoMensaje: mensaje,
-                                sender: emisor
+                                sender: emisor,
+                                numero: numero
                             },
                             $inc: {
                                 nuevos: 1
