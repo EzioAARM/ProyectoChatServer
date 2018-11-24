@@ -79,15 +79,13 @@ io.on('connection', (socket) => {
                             _id: new ObjectID(idConversacion)
                         }, {
                             $set: {
-                                ultimoMensaje: mensaje
+                                ultimoMensaje: mensaje,
+                                sender: emisor
                             },
                             $inc: {
                                 nuevos: 1
                             }
                         }, function(error, updatedDocument) {
-                            console.log(error);
-                            console.log(updatedDocument);
-                            
                             socket.broadcast.emit("RecibirMensaje", json);
                         });
                 });
