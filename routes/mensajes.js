@@ -74,7 +74,7 @@ io.on('connection', (socket) => {
                         console.log(error);
                     }
                     dataBase
-                        .collection(settings.MessagesCollection)
+                        .collection(settings.ConversationsCollection)
                         .updateOne({
                             _id: new ObjectID(idConversacion)
                         }, {
