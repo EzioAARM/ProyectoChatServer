@@ -61,7 +61,7 @@ io.on('connection', (socket) => {
             ubicacionArchivo : ubicacionArchivo,
             hayGrupo : hayGrupo,
             leido : leido,
-            idConversacion: idConversacion,
+            idConversacion: new ObjectID(idConversacion),
             fechaEnviado : moment.unix().format("DD/MM/YY"),
             horaEnviado: moment.unix().format("HH:mm")
         };
