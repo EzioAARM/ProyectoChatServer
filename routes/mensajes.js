@@ -48,6 +48,44 @@ router.get('/:username/:conversacion',middlewareJWT.Auth, function(req, res) {
     });
 });
 
+router.put('/leer/:conversacion/:receptor/:username', middlewareJWT.Auth, function(req, res, next) {
+    var idConversacion = req.params.conversacion;
+    var receptor = req.params.receptor;
+    var username = req.params.username;
+    MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, cliente) {
+        if (error) {
+            res.status(502).send({
+                token: utilidadToken.crearToken(username)
+            });
+        }
+        var dataBase = cliente.db(settings.DB_NAME);
+        dataBase
+            .collection(settings.MessagesCollection)
+            .updateMany({
+                leido: false,
+                idConversacion: new ObjectID(idConversacion),
+                receptor: receptor
+            }, {
+                $set: {
+                    leido: true
+                }
+            }, function(error, updatedDocument) {
+                if (error) {
+                    console.log(error);
+                    
+                    res.status(502).send({
+                        token: utilidadToken.crearToken(username)
+                    });
+                } else {
+                    res.status(204).send({
+                        token: utilidadToken.crearToken(username)
+                    });
+                    cliente.close();
+                }
+            });
+    });
+});
+
 io.on('connection', (socket) => {
     socket.on('join', function(username) {
         console.log(username + " : has joined the chat");

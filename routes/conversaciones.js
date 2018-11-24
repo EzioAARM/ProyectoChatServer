@@ -132,4 +132,42 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
     });
 });
 
+router.put('/reiniciar/:conversacion/:usernameEmisor/:username', middlewareJWT.Auth, function(req, res, next) {
+    var idConversacion = req.params.conversacion;
+    var emisor = req.params.usernameEmisor;
+    var username = req.params.username;
+    MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, cliente) {
+        if (error) {
+            res.status(502).send({
+                token: utilidadToken.crearToken(username)
+            });
+        }
+        var dataBase = cliente.db(settings.DB_NAME);
+        dataBase
+            .collection(settings.ConversationsCollection)
+            .updateOne({
+                _id: new ObjectID(idConversacion),
+                sender: emisor
+            }, {
+                $set: {
+                    nuevos: 0,
+                    sender: ""
+                }
+            }, function(error, updatedDocument) {
+                if (error) {
+                    console.log(error);
+                    
+                    res.status(502).send({
+                        token: utilidadToken.crearToken(username)
+                    });
+                } else {
+                    res.status(204).send({
+                        token: utilidadToken.crearToken(username)
+                    });
+                    cliente.close();
+                }
+            });
+    });
+});
+
 module.exports = router;
