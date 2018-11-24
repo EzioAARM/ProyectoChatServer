@@ -47,29 +47,35 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
             return data;
         };
         callBuscarConversacionExistentePromise().then(function(resultado) {
-            dataBase
-                .collection(settings.ConversationsCollection)
-                .insertOne({
-                    user1: user1,
-                    user2: user2,
-                    esGrupo: esGrupo,
-                    fotoUser1: fotoUser1,
-                    fotoUser2: fotoUser2,
-                    nuevos: 0,
-                    ultimoMensaje: "",
-                    eliminoUser1: false,
-                    eliminoUser2: false
-                }, function(error, result) {
-                    if (error) {
-                        res.status(502).send({
-                            token: utilidadToken.crearToken(user1)
-                        });
-                    } else {
-                        res.status(201).send({
-                            token: utilidadToken.crearToken(user1)
-                        });
-                    }
+            if (resultado) {
+                res.status(301).send({
+                    token: utilidadToken.crearToken(user1)
                 });
+            } else {
+                dataBase
+                    .collection(settings.ConversationsCollection)
+                    .insertOne({
+                        user1: user1,
+                        user2: user2,
+                        esGrupo: esGrupo,
+                        fotoUser1: fotoUser1,
+                        fotoUser2: fotoUser2,
+                        nuevos: 0,
+                        ultimoMensaje: "",
+                        eliminoUser1: false,
+                        eliminoUser2: false
+                    }, function(error, result) {
+                        if (error) {
+                            res.status(502).send({
+                                token: utilidadToken.crearToken(user1)
+                            });
+                        } else {
+                            res.status(201).send({
+                                token: utilidadToken.crearToken(user1)
+                            });
+                        }
+                    });
+            }
         }).catch((error) => {
             res.status(502).send({
                 token: utilidadToken.crearToken(user1)
