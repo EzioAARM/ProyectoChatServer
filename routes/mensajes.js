@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
             hayGrupo : hayGrupo,
             leido : leido,
             idConversacion: new ObjectID(idConversacion),
-            fechaEnviado : moment().unix().v,
+            fechaEnviado : moment().unix(),
             horaEnviado: moment().unix(),
             numero: numero
         };
