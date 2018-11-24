@@ -73,7 +73,20 @@ io.on('connection', (socket) => {
                     if (err){ 
                         console.log(error);
                     }
-                    socket.broadcast.emit("RecibirMensaje", json);
+                    dataBase
+                        .collection(settings.MessagesCollection)
+                        .update({
+                            _id: new ObjectID(idConversacion)
+                        }, {
+                            $inc: {
+                                nuevos: 1
+                            },
+                            $set: {
+                                ultimoMensaje: mensaje
+                            }
+                        }, function(error, updatedDocument) {
+                            socket.broadcast.emit("RecibirMensaje", json);
+                        });
                 });
         });
     });
