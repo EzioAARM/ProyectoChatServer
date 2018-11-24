@@ -52,7 +52,7 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
                 res.status(302).send({
                     token: utilidadToken.crearToken(user1)
                 });
-            } catch {
+            } catch (error) {
                 dataBase
                     .collection(settings.ConversationsCollection)
                     .insertOne({
