@@ -48,6 +48,40 @@ router.get('/:username/:conversacion',middlewareJWT.Auth, function(req, res) {
     });
 });
 
+io.on('connection', (socket) => {
+    socket.on('join', function(username) {
+        console.log(username + " : has joined the chat");
+    });
+    socket.on('EnviarMensaje', (emisor, receptor, mensaje, tieneArchivo, ubicacionArchivo, hayGrupo, leido) => {
+        var json = {
+            emisor : emisor,
+            receptor : receptor,
+            mensaje : mensaje,
+            tieneArchivo : tieneArchivo,
+            ubicacionArchivo : ubicacionArchivo,
+            hayGrupo : hayGrupo,
+            leido : leido,
+            fechaEnviado : moment.unix().format("DD/MM/YY"),
+            horaEnviado: moment.unix().format("HH:mm")
+        };
+        MongoClient.connect(settings.DB_CONNECTION_STRING, function(err, client) {
+            var dataBase = client.db(settings.DB_NAME);
+            dataBase
+                .collection(settings.MessagesCollection)
+                .insertOne(json, function(error, result) {
+                    if (err){ 
+                        console.log(error);
+                    }
+                    socket.broadcast.emit("RecibirMensaje", json);
+                });
+        });
+    });
+    socket.on('disconnect', function(){
+        console.log("user has left");
+        socket.broadcast.emit('userDisconnect', 'has left');
+    });
+});
+
 router.get('/:emisor/:clave', middlewareJWT.Auth, function(req, res) {
     var emisor = req.params.emisor;
     var clave = req.params.clave;
@@ -135,55 +169,6 @@ router.post('/', middlewareJWT.Auth, function(req, res) {
     }
     });
     //aqui estaba antes
-    });
-});
-
-io.on('connection', (socket) => {
-    socket.on('join', function(username) {
-        console.log(username +" : has joined the chat "  );
-    });
-    socket.on('messagedetection', (emisor,receptor,mensaje, tieneArchivo, ubicacionArchivo, hayGrupo, leido, fechaEnviado, horaEnviado) => {
-        console.log(emisor+" : " +mensaje);
-        var message = {
-            "emisor":emisor,
-            "mensaje":mensaje
-        };
-        socket.emit('message', message);
-        var json = {
-            emisor : emisor,
-            receptor : receptor,
-            mensaje : mensaje,
-            tieneArchivo : tieneArchivo,
-            ubicacionArchivo : ubicacionArchivo,
-            hayGrupo : hayGrupo,
-            leido : leido,
-            fechaEnviado : fechaEnviado,
-            horaEnviado : horaEnviado
-        };
-        MongoClient.connect(url, function(err, client) {
-            var collection = client.db(dbName).collection("mensajes");
-            collection.findOne({username: emisor}, function(err, result) {
-                if (err){ 
-                    res.send({status: 502});
-                }
-                if (!result){
-                    res.send({ status: 404 });
-                } else {
-                    collection.insertOne(json, function(err, result){
-                        if (err){
-                            res.send(404);
-                        }
-                        else {
-                            res.send({
-                                status: 200
-                            });
-                        }
-                    });
-                    client.close();
-                }
-            });
-            //aqui estaba antes
-        });
     });
 });
 
