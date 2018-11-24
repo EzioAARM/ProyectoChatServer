@@ -75,7 +75,7 @@ io.on('connection', (socket) => {
                     }
                     dataBase
                         .collection(settings.MessagesCollection)
-                        .update({
+                        .updateOne({
                             _id: new ObjectID(idConversacion)
                         }, {
                             $inc: {
