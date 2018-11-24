@@ -38,9 +38,9 @@ router.get('/:username/:conversacion',middlewareJWT.Auth, function(req, res) {
                         });
                     } else {
                         documento[0].token = utilidadToken.crearToken(username)
-                        res.status(302).send(
+                        res.status(200).send({
                             documento
-                        );
+                        });
                     }
                 }
             });
