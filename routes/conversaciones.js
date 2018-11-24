@@ -48,7 +48,7 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
         };
         callBuscarConversacionExistentePromise().then(function(resultado) {
             if (resultado) {
-                res.status(301).send({
+                res.status(302).send({
                     token: utilidadToken.crearToken(user1)
                 });
             } else {
