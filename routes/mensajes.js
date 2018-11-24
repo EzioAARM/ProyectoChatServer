@@ -78,13 +78,16 @@ io.on('connection', (socket) => {
                         .updateOne({
                             _id: new ObjectID(idConversacion)
                         }, {
-                            $inc: {
-                                nuevos: 1
-                            },
                             $set: {
                                 ultimoMensaje: mensaje
+                            },
+                            $inc: {
+                                nuevos: 1
                             }
                         }, function(error, updatedDocument) {
+                            console.log(error);
+                            console.log(updatedDocument);
+                            
                             socket.broadcast.emit("RecibirMensaje", json);
                         });
                 });
