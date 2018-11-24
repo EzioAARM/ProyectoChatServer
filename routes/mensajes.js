@@ -12,7 +12,7 @@ var settings = require('./config');
 var moment = require('moment');
 
 // Obtiene todos los mensajes de una conversación
-router.get('/:username/:conversacion', function(req, res) {
+router.get('/:username/:conversacion',middlewareJWT.Auth, function(req, res) {
     var id = req.params.conversacion;
     var username = req.params.username;
     MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, client) {
@@ -32,10 +32,16 @@ router.get('/:username/:conversacion', function(req, res) {
                         token: utilidadToken.crearToken(username)
                     });
                 } else {
-                    documento.token = utilidadToken.crearToken(username)
-                    res.status(502).send(
-                        documento
-                    );
+                    if (documento.length == 0) {
+                        res.status(404).send({
+                            token: utilidadToken.crearToken(username)
+                        });
+                    } else {
+                        documento[0].token = utilidadToken.crearToken(username)
+                        res.status(302).send(
+                            documento
+                        );
+                    }
                 }
             });
         client.close();
@@ -43,11 +49,34 @@ router.get('/:username/:conversacion', function(req, res) {
 });
 
 router.get('/:emisor/:clave', middlewareJWT.Auth, function(req, res) {
-var emisor = req.params.emisor;
-var clave = req.params.clave;
-MongoClient.connect(url, function(err, client) {
-var collection = client.db(dbName).collection("mensajes");
-collection.find({emisor:emisor,mensaje:{$regex : clave}}).toArray(function(err, documento){
+    var emisor = req.params.emisor;
+    var clave = req.params.clave;
+    MongoClient.connect(url, function(err, client) {
+    var collection = client.db(dbName).collection("mensajes");
+    collection.find({emisor:emisor,mensaje:{$regex : clave}}).toArray(function(err, documento){
+        if (err){
+            res.status(404).send({
+                token: utilidadToken.crearToken(emisor)
+            });
+        }
+        else {
+            res.status(200).send({
+                token: utilidadToken.crearToken(emisor),
+                data: documento
+            });
+        }
+    });
+    client.close();
+    });
+});
+
+router.get('/:emisor/:receptor/:clave', middlewareJWT.Auth, function(req, res) {
+    var emisor = req.params.emisor;
+    var receptor = req.params.receptor;
+    var clave = req.params.clave;
+    MongoClient.connect(url, function(err, client) {
+    var collection = client.db(dbName).collection("mensajes");
+    collection.find({emisor:emisor, receptor:receptor,mensaje:{$regex : clave}}).toArray(function(err, documento){
     if (err){
         res.status(404).send({
             token: utilidadToken.crearToken(emisor)
@@ -59,77 +88,54 @@ collection.find({emisor:emisor,mensaje:{$regex : clave}}).toArray(function(err, 
             data: documento
         });
     }
-});
-client.close();
-});
-});
-
-router.get('/:emisor/:receptor/:clave', middlewareJWT.Auth, function(req, res) {
-var emisor = req.params.emisor;
-var receptor = req.params.receptor;
-var clave = req.params.clave;
-MongoClient.connect(url, function(err, client) {
-var collection = client.db(dbName).collection("mensajes");
-collection.find({emisor:emisor, receptor:receptor,mensaje:{$regex : clave}}).toArray(function(err, documento){
-if (err){
-    res.status(404).send({
-        token: utilidadToken.crearToken(emisor)
     });
-}
-else {
-    res.status(200).send({
-        token: utilidadToken.crearToken(emisor),
-        data: documento
+    client.close();
     });
-}
-});
-client.close();
-});
 });
 
 router.post('/', middlewareJWT.Auth, function(req, res) {
-var json = {
-emisor : req.body.emisor,
-receptor : req.body.receptor,
-mensaje : req.body.mensaje,
-tieneArchivo : req.body.tieneArchivo,
-ubicacionArchivo : req.body.ubicacionArchivo,
-hayGrupo : req.body.hayGrupo,
-leido : req.body.leido,
-fechaEnviado : req.body.fechaEnviado,
-horaEnviado : req.body.horaEnviado
-};
-MongoClient.connect(url, function(err, client) {
-var collection = client.db(dbName).collection("mensajes");
-collection.findOne({username: req.body.receptor}, function(err, result) {
-if (err){ 
-    res.status(502).send({
-        token: utilidadToken.crearToken(emisor)
+    var json = {
+        emisor : req.body.emisor,
+        receptor : req.body.receptor,
+        mensaje : req.body.mensaje,
+        tieneArchivo : req.body.tieneArchivo,
+        ubicacionArchivo : req.body.ubicacionArchivo,
+        hayGrupo : req.body.hayGrupo,
+        leido : req.body.leido,
+        fechaEnviado : req.body.fechaEnviado,
+        horaEnviado : req.body.horaEnviado
+    };
+    MongoClient.connect(url, function(err, client) {
+    var collection = client.db(dbName).collection("mensajes");
+    collection.findOne({username: req.body.receptor}, function(err, result) {
+    if (err){ 
+        res.status(502).send({
+            token: utilidadToken.crearToken(emisor)
+        });
+    }
+    if (!result){
+        res.status(404).send({
+            token: utilidadToken.crearToken(emisor)
+        });
+    } else {
+    collection.insertOne(json, function(err, result){
+    if (err){
+        res.status(404).send({
+            token: utilidadToken.crearToken(username)
+        });
+    console.log(err);
+    }
+    else {
+        res.status(200).send({
+            token: utilidadToken.crearToken(username)
+        });
+    }
     });
-}
-if (!result){
-    res.status(404).send({
-        token: utilidadToken.crearToken(emisor)
+    client.close();
+    }
     });
-} else {
-collection.insertOne(json, function(err, result){
-if (err){
-    res.status(404).send({
-        token: utilidadToken.crearToken(username)
+    //aqui estaba antes
     });
-console.log(err);
-}
-else {
-    res.status(200).send({
-        token: utilidadToken.crearToken(username)
-    });
-}
-});
-client.close();
-}
-});
-//aqui estaba antes
-});
 });
 
 io.on('connection', (socket) => {
