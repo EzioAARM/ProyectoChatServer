@@ -24,14 +24,17 @@ router.post('/upload', function(req, res){
     form.type = true;
     form.parse(req);
     form.on('fileBegin', function(name, file){
-        file.path = __dirname + '\\uploads\\' + moment.unix() + file.name;
+        var fechaUnica = moment.unix();
+        var nombreOriginal = file.name;
+        nombre = fechaUnica + "_" + file.name;
+        file.path = __dirname + '\\uploads\\' + file.name;
         ruta = file.path;
-        nombre = file.name;
     });
     form.on('end', function(){
         var json = {
             'nombre': nombre,
-            'ruta'  : ruta
+            'ruta'  : ruta,
+            'nombreOriginal': nombreOriginal
         };
         MongoClient.connect(settings.DB_CONNECTION_STRING, function(err, client) {
             var collection = client.db(settings.DB_NAME).collection(settings.FilesCollection);

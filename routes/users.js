@@ -157,7 +157,7 @@ router.get('/all/:user', middlewareJWT.Auth, function(req, res) {
 
 // Registra un usuario
 router.post('/registrar', function(req, res, next) {
-    var username = req.body.user;
+    var username = req.body.username;
     var password = req.body.password;
     var nombre = req.body.nombre;
     var apellido = req.body.apellido;
