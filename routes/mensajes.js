@@ -52,7 +52,7 @@ io.on('connection', (socket) => {
     socket.on('join', function(username) {
         console.log(username + " : has joined the chat");
     });
-    socket.on('EnviarMensaje', (emisor, receptor, mensaje, tieneArchivo, ubicacionArchivo, hayGrupo, leido) => {
+    socket.on('EnviarMensaje', (emisor, receptor, mensaje, tieneArchivo, ubicacionArchivo, hayGrupo, leido, idConversacion) => {
         var json = {
             emisor : emisor,
             receptor : receptor,
@@ -61,6 +61,7 @@ io.on('connection', (socket) => {
             ubicacionArchivo : ubicacionArchivo,
             hayGrupo : hayGrupo,
             leido : leido,
+            idConversacion: idConversacion,
             fechaEnviado : moment.unix().format("DD/MM/YY"),
             horaEnviado: moment.unix().format("HH:mm")
         };
