@@ -112,10 +112,16 @@ router.get('/todas/:username', middlewareJWT.Auth, function(req, res, next) {
         };
 
         callBuscarConversacionesPromise().then(function (resultado) {
-            res.status(302).send({
-                data: resultado,
-                token: utilidadToken.crearToken(username)
-            });
+            if (resultado) {
+                resultado[0].token = utilidadToken.crearToken(username);
+                res.status(200).send(
+                    resultado
+                );
+            } else {
+                res.status(404).send({
+                    token: utilidadToken.crearToken(username)
+                });
+            }
         });
     });
 });
