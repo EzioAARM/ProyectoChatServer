@@ -77,7 +77,7 @@ router.put('/leer/:conversacion/:receptor/:username', middlewareJWT.Auth, functi
                         token: utilidadToken.crearToken(username)
                     });
                 } else {
-                    res.status(204).send({
+                    res.status(200).send({
                         token: utilidadToken.crearToken(username)
                     });
                     cliente.close();

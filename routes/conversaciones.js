@@ -161,7 +161,7 @@ router.put('/reiniciar/:conversacion/:usernameEmisor/:username', middlewareJWT.A
                         token: utilidadToken.crearToken(username)
                     });
                 } else {
-                    res.status(204).send({
+                    res.status(200).send({
                         token: utilidadToken.crearToken(username)
                     });
                     cliente.close();
