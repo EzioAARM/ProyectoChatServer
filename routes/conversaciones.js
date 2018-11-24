@@ -47,12 +47,11 @@ router.post('/nueva', middlewareJWT.Auth, function(req, res, next) {
             return data;
         };
         callBuscarConversacionExistentePromise().then(function(resultado) {
-            try {
-                var test = resultado[1];
+            if (resultado == null) {
                 res.status(302).send({
                     token: utilidadToken.crearToken(user1)
                 });
-            } catch (error) {
+            } else {
                 dataBase
                     .collection(settings.ConversationsCollection)
                     .insertOne({
