@@ -37,10 +37,7 @@ router.get('/user/:user', middlewareJWT.Auth, function(req, res) {
             return data;
         };
         callBuscarPerfilPromise().then(function (resultado) {
-            res.status(302).send({
-                token: utilidadToken.crearToken(user),
-                data: resultado
-            });
+            res.status(302).send(resultado);
         });
     });
 });
@@ -59,7 +56,16 @@ router.get('/mensajes/:user', middlewareJWT.Auth, function(req, res) {
             return new Promise((resolve, reject) => {
                 dataBase
                     .collection(settings.MessagesCollection)
-                    .find({$or:[{sender: {$regex:user}}, {receptor: {$regex:user}}]}).toArray(function(error, result){
+                    .find({
+                            $or: [
+                                {
+                                    emisor: user
+                                }, 
+                                {
+                                    receptor: user
+                                }
+                            ]
+                        }).toArray(function(error, result){
                         error
                         ? reject(error)
                         : resolve(result);
@@ -72,10 +78,7 @@ router.get('/mensajes/:user', middlewareJWT.Auth, function(req, res) {
             return data;
         };
         callBuscarPerfilPromise().then(function (resultado) {
-            res.status(302).send({
-                token: utilidadToken.crearToken(user),
-                data: resultado
-            });
+            res.status(302).send(resultado);
         });
     });
 });
