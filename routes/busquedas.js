@@ -12,7 +12,7 @@ router.get('/user/:user', middlewareJWT.Auth, function(req, res) {
     MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, client) {
         if (error) {
             res.status(502).send({
-                token: utilidadToken.crearToken(username)
+                token: utilidadToken.crearToken(user)
             });
         }
         var dataBase = client.db(settings.DB_NAME);
@@ -44,11 +44,10 @@ router.get('/user/:user', middlewareJWT.Auth, function(req, res) {
 
 router.get('/mensajes/:user', middlewareJWT.Auth, function(req, res) {
     var user = req.params.user;
-    var numero =parseInt(req.params.numero);
     MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, client) {
         if (error) {
             res.status(502).send({
-                token: utilidadToken.crearToken(username)
+                token: utilidadToken.crearToken(user)
             });
         }
         var dataBase = client.db(settings.DB_NAME);
@@ -89,7 +88,7 @@ router.get('/mensajes/:user/:numero', middlewareJWT.Auth, function(req, res) {
     MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, client) {
         if (error) {
             res.status(502).send({
-                token: utilidadToken.crearToken(username)
+                token: utilidadToken.crearToken(user)
             });
         }
         var dataBase = client.db(settings.DB_NAME);
@@ -124,7 +123,7 @@ router.get('/user/:user/:numero', middlewareJWT.Auth, function(req, res) {
     MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, client) {
         if (error) {
             res.status(502).send({
-                token: utilidadToken.crearToken(username)
+                token: utilidadToken.crearToken(user)
             });
         }
         var dataBase = client.db(settings.DB_NAME);
@@ -133,6 +132,75 @@ router.get('/user/:user/:numero', middlewareJWT.Auth, function(req, res) {
                 dataBase
                     .collection(settings.UsersCollection)
                     .find({username: {$regex:user}}).limit(numero).toArray(function(error, result){
+                        error
+                        ? reject(error)
+                        : resolve(result);
+                    });
+            });
+        };
+
+        var callBuscarPerfilPromise = async() => {
+            var data = await (buscarPerfilPromise());
+            return data;
+        };
+        callBuscarPerfilPromise().then(function (resultado) {
+            res.status(302).send({
+                token: utilidadToken.crearToken(user),
+                data: resultado
+            });
+        });
+    });
+});
+
+router.get('/archivo/:user/:numero', middlewareJWT.Auth, function(req, res) {
+    var user = req.params.user;
+    var numero =parseInt(req.params.numero);
+    MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, client) {
+        if (error) {
+            res.status(502).send({
+                token: utilidadToken.crearToken(user)
+            });
+        }
+        var dataBase = client.db(settings.DB_NAME);
+        var buscarPerfilPromise = () => {
+            return new Promise((resolve, reject) => {
+                dataBase
+                    .collection(settings.FilesCollection)
+                    .find({$or: [{emisor : user},{receptor : user}]}).limit(numero).toArray(function(error, result){
+                        error
+                        ? reject(error)
+                        : resolve(result);
+                    });
+            });
+        };
+
+        var callBuscarPerfilPromise = async() => {
+            var data = await (buscarPerfilPromise());
+            return data;
+        };
+        callBuscarPerfilPromise().then(function (resultado) {
+            res.status(302).send({
+                token: utilidadToken.crearToken(user),
+                data: resultado
+            });
+        });
+    });
+});
+
+router.get('/archivo/:user', middlewareJWT.Auth, function(req, res) {
+    var user = req.params.user;
+    MongoClient.connect(settings.DB_CONNECTION_STRING, function(error, client) {
+        if (error) {
+            res.status(502).send({
+                token: utilidadToken.crearToken(user)
+            });
+        }
+        var dataBase = client.db(settings.DB_NAME);
+        var buscarPerfilPromise = () => {
+            return new Promise((resolve, reject) => {
+                dataBase
+                    .collection(settings.FilesCollection)
+                    .find({$or: [{emisor : user},{receptor : user}]}).toArray(function(error, result){
                         error
                         ? reject(error)
                         : resolve(result);
