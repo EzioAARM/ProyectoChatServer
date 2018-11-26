@@ -78,7 +78,7 @@ router.get('/mensajes/:user', middlewareJWT.Auth, function(req, res) {
             return data;
         };
         callBuscarPerfilPromise().then(function (resultado) {
-            res.status(302).send(resultado);
+            res.status(200).send(resultado);
         });
     });
 });
