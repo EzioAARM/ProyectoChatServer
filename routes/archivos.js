@@ -25,10 +25,12 @@ router.get('/download/imagen/:username/:nombre', middlewareJWT.Auth, function(re
     });
 });
 
-router.post('/upload/imagen/:user', middlewareJWT.Auth, function(req, res){
+router.post('/upload/imagen', middlewareJWT.Auth, function(req, res){
     var ruta = "";
     var nombre = "";
-    var username = req.params.user;
+    var username = req.body.user;
+    var emisor = req.body.emisor;
+    var receptor = req.body.receptor;
     var form = new formidable.IncomingForm();
     form.type = true;
     form.parse(req);
@@ -43,7 +45,9 @@ router.post('/upload/imagen/:user', middlewareJWT.Auth, function(req, res){
         var json = {
             'nombre': nombre,
             'ruta'  : ruta,
-            'nombreOriginal': nombreOriginal
+            'nombreOriginal': nombreOriginal,
+            'emisor' : emisor,
+            'receptor' : receptor
         };
         MongoClient.connect(settings.DB_CONNECTION_STRING, function(err, client) {
             var collection = client.db(settings.DB_NAME).collection(settings.ImageCollection);
