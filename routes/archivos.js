@@ -13,16 +13,72 @@ var moment = require('moment');
 
 router.get('/download/archivo/:username/:nombre', middlewareJWT.Auth, function(req, res){
     var ruta =  __dirname + '\\uploads\\' + req.params.nombre;
-    res.download(ruta).status(200).send({
-        token : utilidadToken.crearToken(req.params.username)
-    });
+    var username = req.params.username;
+    var flag = false;
+    MongoClient.connect(settings.DB_CONNECTION_STRING, function(err, client) {
+        var collection = client.db(settings.DB_NAME).collection(settings.FilesCollection);
+        collection.findOne({$or:[{emisor:username, nombreOriginal : nombre},{receptor:username, nombreOriginal : nombre}]}, function(err, result){
+            if (err){
+                res.status(502).send({
+                    token: utilidadToken.crearToken(username)   
+                });
+                console.log(err);
+            } else {
+                res.status(200).send({
+                    token : utilidadToken.crearToken(username)
+                });
+                if(result){
+                    flag = true;
+                }
+            }
+        });
+        client.close();
+    });    
+    if(flag){
+        res.download(ruta).status(200).send({
+            token : utilidadToken.crearToken(req.params.username)
+        });
+    }
+    else{
+        res.status(404).send({
+            token : utilidadToken.crearToken(req.params.username)
+        });
+    }
 });
 
 router.get('/download/imagen/:username/:nombre', middlewareJWT.Auth, function(req, res){
     var ruta =  __dirname + '\\uploads\\' + req.params.nombre;
-    res.download(ruta).status(200).send({
-        token : utilidadToken.crearToken(req.params.username)
-    });
+    var username = req.params.username;
+    var flag = false;
+    MongoClient.connect(settings.DB_CONNECTION_STRING, function(err, client) {
+        var collection = client.db(settings.DB_NAME).collection(settings.ImageCollection);
+        collection.findOne({$or:[{emisor:username, nombreOriginal : nombre},{receptor:username, nombreOriginal : nombre}]}, function(err, result){
+            if (err){
+                res.status(502).send({
+                    token: utilidadToken.crearToken(username)   
+                });
+                console.log(err);
+            } else {
+                res.status(200).send({
+                    token : utilidadToken.crearToken(username)
+                });
+                if(result){
+                    flag = true;
+                }
+            }
+        });
+        client.close();
+    });    
+    if(flag){
+        res.download(ruta).status(200).send({
+            token : utilidadToken.crearToken(req.params.username)
+        });
+    }
+    else{
+        res.status(404).send({
+            token : utilidadToken.crearToken(req.params.username)
+        });
+    }
 });
 
 router.post('/upload/imagen', middlewareJWT.Auth, function(req, res){
@@ -68,10 +124,10 @@ router.post('/upload/imagen', middlewareJWT.Auth, function(req, res){
     });
 });
 
-router.post('/upload/archivo/:username', middlewareJWT.Auth, function(req, res){
+router.post('/upload/archivo/', middlewareJWT.Auth, function(req, res){
     var ruta = "";
     var nombre = "";
-    var username = req.params.username;
+    var username = req.body.username;
     var form = new formidable.IncomingForm();
     form.type = true;
     form.parse(req);
@@ -86,7 +142,9 @@ router.post('/upload/archivo/:username', middlewareJWT.Auth, function(req, res){
         var json = {
             'nombre': nombre,
             'ruta'  : ruta,
-            'nombreOriginal': nombreOriginal
+            'nombreOriginal': nombreOriginal,
+            'emisor' : emisor,
+            'receptor' : receptor
         };
         MongoClient.connect(settings.DB_CONNECTION_STRING, function(err, client) {
             var collection = client.db(settings.DB_NAME).collection(settings.FilesCollection);
