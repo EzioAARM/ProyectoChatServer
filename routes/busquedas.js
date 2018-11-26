@@ -37,10 +37,7 @@ router.get('/user/:user', middlewareJWT.Auth, function(req, res) {
             return data;
         };
         callBuscarPerfilPromise().then(function (resultado) {
-            res.status(302).send({
-                token: utilidadToken.crearToken(user),
-                data: resultado
-            });
+            res.status(302).send(resultado);
         });
     });
 });
@@ -81,10 +78,7 @@ router.get('/mensajes/:user', middlewareJWT.Auth, function(req, res) {
             return data;
         };
         callBuscarPerfilPromise().then(function (resultado) {
-            res.status(302).send({
-                token: utilidadToken.crearToken(user),
-                data: resultado
-            });
+            res.status(302).send(resultado);
         });
     });
 });
