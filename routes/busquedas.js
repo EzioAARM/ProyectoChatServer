@@ -59,7 +59,16 @@ router.get('/mensajes/:user', middlewareJWT.Auth, function(req, res) {
             return new Promise((resolve, reject) => {
                 dataBase
                     .collection(settings.MessagesCollection)
-                    .find({$or:[{sender: {$regex:user}}, {receptor: {$regex:user}}]}).toArray(function(error, result){
+                    .find({
+                            $or: [
+                                {
+                                    emisor: user
+                                }, 
+                                {
+                                    receptor: user
+                                }
+                            ]
+                        }).toArray(function(error, result){
                         error
                         ? reject(error)
                         : resolve(result);
