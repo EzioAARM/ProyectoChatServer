@@ -6,5 +6,6 @@ module.exports = {
     ConversationsCollection: "conversaciones",
     MessagesCollection: "mensajes",
     GroupsCollection: "grupos",
-    FilesCollection: "archivos"
+    FilesCollection: "archivos",
+    ImageCollection: "imagenes"
 };

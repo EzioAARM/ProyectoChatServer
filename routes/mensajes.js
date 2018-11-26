@@ -48,6 +48,45 @@ router.get('/:username/:conversacion',middlewareJWT.Auth, function(req, res) {
     });
 });
 
+router.post('/upload/imagen', middlewareJWT.Auth, function(req, res){
+    var ruta = "";
+    var nombre = "";
+    var username = req.body.username;
+    var form = new formidable.IncomingForm();
+    form.type = true;
+    form.parse(req);
+    form.on('fileBegin', function(name, file){
+        var fechaUnica = moment.unix();
+        var nombreOriginal = file.name;
+        nombre = fechaUnica + "_" + file.name;
+        file.path = __dirname + '\\uploads\\' + file.name;
+        ruta = file.path;
+    });
+    form.on('end', function(){
+        var json = {
+            'nombre': nombre,
+            'ruta'  : ruta,
+            'nombreOriginal': nombreOriginal
+        };
+        MongoClient.connect(settings.DB_CONNECTION_STRING, function(err, client) {
+            var collection = client.db(settings.DB_NAME).collection(settings.ImageCollection);
+            collection.insertOne(json, function(err, result){
+                if (err){
+                    res.status(502).send({
+                        token: utilidadToken.crearToken(username)   
+                    });
+                    console.log(err);
+                } else {
+                    res.status(200).send({
+                        token : utilidadToken.crearToken(username)
+                    });
+                }
+            });
+            client.close();
+        });
+    });
+});
+
 router.put('/leer/:conversacion/:receptor/:username', middlewareJWT.Auth, function(req, res, next) {
     var idConversacion = req.params.conversacion;
     var receptor = req.params.receptor;
